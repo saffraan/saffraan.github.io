@@ -1,0 +1,13 @@
+var store = [{
+        "title": "Computer_boundary",
+        "excerpt":"Computer boundary 自从第三次工业革命后，信息时代的到来使得计算机成为了人们生活中不可或缺的生产工具，从硬件性能上可以划分为以下几种：超大型计算机（超算，多用于大型科研项目进行海量的计算，其主要侧重于计算尤其是浮点数计算）、大型计算机（主机、服务器，多用于公司生产，运行线上服务和数据库，有强大的IO处理能力）、微型计算机（台式机、笔记本、手机，多用于日常办公和娱乐）。单片机也可以划分为微型计算机，它属于一种用于工业控制的特种计算机。 虽然它们的用途不同，但底层的架构和原理都是相同的，都遵循着（广义上的）冯.诺依曼体系结构，运行的过程都符合图灵机的定义。所以从某种意义上来讲，它们拥有相同的能力边界。有些问题用微型计算机解决不了，同样用大型计算机也解决不了。在使用一种工具、一款软件甚至某项学科时，如果充分了解其边界能力，就可以避免我们做很多无用的尝试。突破边界让人兴奋，可从效率的角度上来讲，事先划定好边界更能提高生产。 Math &amp; CS 数学（math）属于形式科学，是研究数量、结构、变化、空间以及信息等概念的一门学科，它被人们称之为自然科学的皇后。计算机科学（computer sceince，缩写cs）与数学是紧密相关，当开发者在使用计算机去解决一个问题的时候一定会去寻找对应的数学模型，其背后一定符合某种数学原理。即便在与数学很“遥远”的业务开发也是如此，代码中无数的 if 和 else 就是对数学中逻辑学的简单应用。 数学不是万能的 在人们的生产生活中存在着无数个问题，如果把世界上所有问题看作一个集合 S，数学能够覆盖和描述的只是其中一小部分。有很多问题都不属于可计算的问题，例如：为何已经曝光的电信诈骗手法，还是会有人不断的上当受骗？为何同样的礼物送给女友，前一次高兴后一次却生气？ 以上的例子给出的界限都比较模糊，而早在1930年的时候，哥德尔就证明了部分数学公理（蕴含皮亚诺公理体系[2]）不可能既是完备的，又是一致的，即：公理范围内存在命题 P 为真，但无法证明的情况。哥德尔不完备定理的提出，让人们意识到数学的方法并不是万能的，下面是哥德尔不完备定理的内容： TheoremVI: For every ω-consistent primitive recursive class κ of formulae, there is aprimitive recursive class-sign r , such that neither forall(v,r) nornot(forall(v,r)) belongs to Conseq(κ) (where v is the free variable...","categories": [],
+        "tags": [],
+        "url": "/computer_boundary/",
+        "teaser": null
+      },{
+        "title": "Design_pattern",
+        "excerpt":"Design Pattern 23 classification and list Creational patterns Abstract factory 抽象工厂模式，提供一个用于创建相关或依赖对象族的接口，而无需指定其具体类。 使用场景：当一个场景需要引入多个接口，尤其是针对不同资源要绑定不同的对象时。例如：一个player加入战场的时候要分配装备，而且不同阵营的player 分配的装备型号不同。 调用方不需要了解实例化过程和接口对应的实现类，只要能Tank可以开、Gun可以射击，他只需要找到正确的factory。golang的示例代码如下： type Factory interface{ CreateTank() Tank CreateGun() Gun } type Tank interface{ Fire() Run() } type Gun()interface{ Shot() } type sovietFactory struct{ } func (sf *sovietFactory) CreateTank() Car{ return &amp;t34{ gas: 700 engine: \"t34\" bullet: 50 }...","categories": [],
+        "tags": [],
+        "url": "/design_pattern/",
+        "teaser": null
+      }]
