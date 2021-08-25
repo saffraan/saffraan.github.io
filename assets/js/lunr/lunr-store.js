@@ -10,4 +10,10 @@ var store = [{
         "tags": [],
         "url": "/design_pattern/",
         "teaser": null
+      },{
+        "title": "Redis_psync_protocol",
+        "excerpt":"Redis psync protocol redis老版本的同步协议是 SYNC，因为它不支持部分同步所以被PSYNC代替，发展出了 psync1协议。后续为优化由 failover 带来的不必要full Resynchronization，发展出了 psync2 协议。下面的内容是基于 redis 5.0 版本，剖析一下 psync2 协议的实现。 replication handshake slave 与 master 之前发起同步的过程称为 replication handshake， 在 slave node 的 replicationCron 任务（每秒调用一次）中会调用 connectWithMaster -&gt; registry file event[syncWithMaster -&gt; slaveTryPartialResynchronization] 函数与 master node 完成 replication handshake 过程，具体的握手流程实现在syncWithMaster函数中。下面展示的是 slave node进入 REPL_STATE_SEND_PSYNC状态后的交互流程，在此之前，slave 和 master已经依次执行了如下流程： slave...","categories": [],
+        "tags": [],
+        "url": "/redis_psync_protocol/",
+        "teaser": null
       }]

@@ -1,4 +1,819 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2021-06-15T20:40:24+08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Newbee</title><subtitle>Don't worry, be happy.</subtitle><author><name>Zhipeng Wang</name><email>wangzhipenghyc@163.com</email></author><entry><title type="html">Design_pattern</title><link href="http://localhost:4000/design_pattern/" rel="alternate" type="text/html" title="Design_pattern" /><published>2021-06-15T00:00:00+08:00</published><updated>2021-06-15T00:00:00+08:00</updated><id>http://localhost:4000/design_pattern</id><content type="html" xml:base="http://localhost:4000/design_pattern/">&lt;style&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2021-08-25T13:51:36+08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Newbee</title><subtitle>Don't worry, be happy.</subtitle><author><name>Zhipeng Wang</name><email>wangzhipenghyc@163.com</email></author><entry><title type="html">Redis_psync_protocol</title><link href="http://localhost:4000/redis_psync_protocol/" rel="alternate" type="text/html" title="Redis_psync_protocol" /><published>2021-08-25T00:00:00+08:00</published><updated>2021-08-25T00:00:00+08:00</updated><id>http://localhost:4000/redis_psync_protocol</id><content type="html" xml:base="http://localhost:4000/redis_psync_protocol/">&lt;style&gt;
+    p { font: 0.875rem YaHei !important; }
+&lt;/style&gt;
+
+&lt;h1 id=&quot;redis-psync-protocol&quot;&gt;Redis psync protocol&lt;/h1&gt;
+
+&lt;p&gt;redis老版本的同步协议是 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;SYNC&lt;/code&gt;，因为它不支持部分同步所以被&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PSYNC&lt;/code&gt;代替，发展出了 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;psync1&lt;/code&gt;协议。后续为优化由 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;failover&lt;/code&gt; 带来的不必要&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;full Resynchronization&lt;/code&gt;，发展出了 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;psync2&lt;/code&gt; 协议。下面的内容是基于 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;redis 5.0&lt;/code&gt; 版本，剖析一下 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;psync2&lt;/code&gt; 协议的实现。&lt;/p&gt;
+
+&lt;h2 id=&quot;replication-handshake&quot;&gt;replication handshake&lt;/h2&gt;
+&lt;p&gt;slave 与 master 之前发起同步的过程称为 &lt;strong&gt;replication  handshake&lt;/strong&gt;， 在 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave node&lt;/code&gt; 的 &lt;a href=&quot;https://github.com/redis/redis/blob/5.0/src/replication.c#L2578&quot;&gt;replicationCron&lt;/a&gt; 任务（每秒调用一次）中会调用 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;connectWithMaster -&amp;gt; registry file event[syncWithMaster -&amp;gt; slaveTryPartialResynchronization]&lt;/code&gt; 函数与 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt; 完成 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replication  handshake&lt;/code&gt; 过程，具体的握手流程实现在&lt;a href=&quot;https://github.com/redis/redis/blob/5.0/src/replication.c#L1643&quot;&gt;syncWithMaster&lt;/a&gt;函数中。下面展示的是 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave node&lt;/code&gt;进入 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;REPL_STATE_SEND_PSYNC&lt;/code&gt;状态后的交互流程，在此之前，&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave&lt;/code&gt; 和 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master&lt;/code&gt;已经依次执行了如下流程：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;slave 向 master 发起 tcp 链接；&lt;/li&gt;
+  &lt;li&gt;slave 向 master 发送 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PING&lt;/code&gt; 命令，master 响应是否需要AUTH，即返回 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-NOAUTH&lt;/code&gt;，如果需要执行 3，否则跳转到 4；&lt;/li&gt;
+  &lt;li&gt;slave 向 master 发送 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;AUTH masterauth&lt;/code&gt;，master 响应是否认证成功；&lt;/li&gt;
+  &lt;li&gt;slave 发送 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;REPLCONF listening-port port&lt;/code&gt; （如果 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave_announce_port&lt;/code&gt; 不存在，则返发送&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;tcp listening port&lt;/code&gt;）；如果&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave_announce_ip&lt;/code&gt; 不为 NULL 则发送 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;REPLCONF ip-address slave_announce_ip&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;slave 向 master 同步当前支持的能力，发送 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;REPLCONF capa eof capa psync2&lt;/code&gt;。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;从 1~5 过程中，slave 状态依次经过如下变迁： &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;REPL_STATE_NONE -&amp;gt; REPL_STATE_CONNECT -&amp;gt; REPL_STATE_CONNECTING -&amp;gt; REPL_STATE_RECEIVE_PONG -&amp;gt; REPL_STATE_SEND_AUTH -&amp;gt; REPL_STATE_RECEIVE_AUTH -&amp;gt; REPL_STATE_SEND_PORT -&amp;gt; REPL_STATE_RECEIVE_PORT -&amp;gt; REPL_STATE_SEND_IP -&amp;gt; REPL_STATE_RECEIVE_IP -&amp;gt; REPL_STATE_SEND_CAPA -&amp;gt; REPL_STATE_RECEIVE_CAPA -&amp;gt; REPL_STATE_RECEIVE_PSYNC&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img class=&quot;mermaid&quot; src=&quot;https://mermaid.ink/svg/eyJjb2RlIjoic2VxdWVuY2VEaWFncmFtXG5wYXJ0aWNpcGFudCBTbGF2ZVxucGFydGljaXBhbnQgTWFzdGVyXG5Ob3RlIGxlZnQgb2YgU2xhdmU6IFJFUExfU1RBVEVfU0VORF9QU1lOQ1xuJSUtXG5hbHQgcmVwbGlkICsgb2Zmc2V0IGlzIGV4aXN0c1xuU2xhdmUgLT4-IE1hc3RlcjogUFNZTkMgcmVwbGlkIG9mZnNldFxuZWxzZVxuU2xhdmUgLT4-IE1hc3RlcjogUFNZTkMgPyAtMVxuZW5kXG4lJS1cbk5vdGUgbGVmdCBvZiBTbGF2ZTogUkVQTF9TVEFURV9SRUNFSVZFX1BTWU5DXG5hbHQgRlVMTCBSRVNZTkNcbk1hc3RlciAtPj4gU2xhdmU6ICtGVUxMUkVTWU5DIHJlcGxpZCBvZmZzZXRcblNsYXZlIC0-PiBTbGF2ZTogdXBkYXRlIG1hc3Rlcl9yZXBsaWQgYW5kIG1hc3Rlcl9pbml0aWFsX29mZnNldFxuJSUtXG5Ob3RlIG92ZXIgU2xhdmUsIE1hc3RlcjogRlVMTCBTWU5DXG4lJS1cbmVsc2UgUFNZTkNcbk1hc3RlciAtPj4gU2xhdmU6ICtDT05USU5VRSByZXBsaWRcbk5vdGUgbGVmdCBvZiBTbGF2ZTogUkVQTF9TVEFURV9DT05ORUNURURcbmVuZFxuJSUtIiwibWVybWFpZCI6bnVsbH0&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;当 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master&lt;/code&gt; 返回&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;+CONTINUE replid&lt;/code&gt;时，&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave node&lt;/code&gt; 进入 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;REPL_STATE_CONNECTED&lt;/code&gt;状态，开始接收 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt; 同步过来的命令。&lt;/p&gt;
+
+&lt;p&gt;执行&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Full Resynchronization&lt;/code&gt; 时 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Master node&lt;/code&gt; 会调用 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;fork()&lt;/code&gt; 创建一个&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Backend Process&lt;/code&gt; 与 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Slave Nodes&lt;/code&gt; 进行同步通信，避免阻塞&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Master node&lt;/code&gt;对外提供服务：&lt;/p&gt;
+
+&lt;p&gt;&lt;img class=&quot;mermaid&quot; src=&quot;https://mermaid.ink/svg/eyJjb2RlIjoic2VxdWVuY2VEaWFncmFtXG5wYXJ0aWNpcGFudCBTbGF2ZVxucGFydGljaXBhbnQgQmFja2VuZE1hc3RlclxuTm90ZSBsZWZ0IG9mIFNsYXZlOiBSRVBMX1NUQVRFX1RSQU5TRkVSXG5vcHQgbm90IGRpc2tsZXNzIHN5bmNcbkJhY2tlbmRNYXN0ZXIgLS0-PiBCYWNrZW5kTWFzdGVyOiBCR1NBVkVcbmVuZFxuJSUtXG5sb29wIHVudGlsIGVvZlxuQmFja2VuZE1hc3RlciAtPj4gU2xhdmU6IHNlbmQgUkRCIGRhdGFcblNsYXZlIC0-PiBTbGF2ZTogc2F2ZSBpbiB0aGUgdGVtcCBmaWxlXG5lbmRcbiUlLVxuU2xhdmUtPj5TbGF2ZTogbG9hZCB0aGUgdGVtcCBmaWxlXG4lJS1cbk5vdGUgbGVmdCBvZiBTbGF2ZTogUkVQTF9TVEFURV9DT05ORUNURUQiLCJtZXJtYWlkIjpudWxsfQ&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;在全量同步时 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backend save process&lt;/code&gt; 会先生成一个 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;RDB file&lt;/code&gt; 保存在磁盘里，然后再从磁盘中将文件加载到内存同步给&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave nodes&lt;/code&gt;。与此同时它会缓冲当前收到的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;client command&lt;/code&gt;，当 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;RDB file&lt;/code&gt; 数据传输完成后，&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master&lt;/code&gt; 会把缓冲的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;command&lt;/code&gt; 全部发送给 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave&lt;/code&gt; 。&lt;strong&gt;如果并发有多个全量同步请求，&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master&lt;/code&gt; 只会 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;fork&lt;/code&gt; 一个 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backend process&lt;/code&gt; 去服务所有请求&lt;/strong&gt;，当无法附加到当前的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;BGSAVE&lt;/code&gt; 流程时（&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave capability&lt;/code&gt;与开启当前&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;BGSAVE&lt;/code&gt;流程的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave node&lt;/code&gt; 不同），需要去等待下一个 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;BGSAVE&lt;/code&gt; 或 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;SYNC&lt;/code&gt;(详情见&lt;a href=&quot;https://github.com/redis/redis/blob/5.0/src/replication.c#L629&quot;&gt;syncCommand&lt;/a&gt;函数)。&lt;/p&gt;
+
+&lt;p&gt;当 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt; 所在宿主机的磁盘读写速度较慢时，会对&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt;带来额外的压力，为了解决这个问题，在2.8.18以后的版本支持不使用磁盘作为中间存储的介质，直接在&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backend process&lt;/code&gt;中通过网络发送到给其他的&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave nodes&lt;/code&gt;（前提是在 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave nodes&lt;/code&gt; 支持 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;eof capability&lt;/code&gt; 的情况下，在 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replication shake&lt;/code&gt;过程中通过 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;REPLCONF&lt;/code&gt;命令同步 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave capability&lt;/code&gt;），可以通过&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;repl-diskless-sync&lt;/code&gt;开启这个选项。&lt;strong&gt;在diskless模式下，为了延迟几秒等待更多的slave nodes 全量同步请求到达，backend process不会立即创建， 而是放在 replicationCron()中被创建&lt;/strong&gt;，如果已经被启动，则需要等待下一个 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;BGSAVE&lt;/code&gt; 或 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;SYNC&lt;/code&gt;(详情见&lt;a href=&quot;https://github.com/redis/redis/blob/5.0/src/replication.c#L629&quot;&gt;syncCommand&lt;/a&gt;函数)。&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master&lt;/code&gt; 判断是否直接通过 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;socket&lt;/code&gt; 发送 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;RDB&lt;/code&gt; 数据的代码 &lt;a href=&quot;https://github.com/redis/redis/blob/5.0/src/replication.c#L564&quot;&gt;startBgsaveForReplication&lt;/a&gt; 如下：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-C&quot;&gt;
+int startBgsaveForReplication(int mincapa) {
+    int retval;
+    // 需要 master 开启 repl_diskless_sync 选项，同时 slave 支持 SLAVE_CAPA_EOF
+    int socket_target = server.repl_diskless_sync &amp;amp;&amp;amp; (mincapa &amp;amp; SLAVE_CAPA_EOF); 
+    listIter li;
+    listNode *ln;
+
+    serverLog(LL_NOTICE,&quot;Starting BGSAVE for SYNC with target: %s&quot;,
+        socket_target ? &quot;replicas sockets&quot; : &quot;disk&quot;);
+
+    rdbSaveInfo rsi, *rsiptr;
+    rsiptr = rdbPopulateSaveInfo(&amp;amp;rsi);
+    /* Only do rdbSave* when rsiptr is not NULL,
+     * otherwise slave will miss repl-stream-db. */
+    if (rsiptr) {
+        // 需要支持 socket_target;
+        if (socket_target) 
+            retval = rdbSaveToSlavesSockets(rsiptr);
+        else
+            retval = rdbSaveBackground(server.rdb_filename,rsiptr);
+    } else {
+        serverLog(LL_WARNING,&quot;BGSAVE for replication: replication information not available, can't generate the RDB file right now. Try later.&quot;);
+        retval = C_ERR;
+    }
+}
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave&lt;/code&gt; 接收并加载&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;RDB&lt;/code&gt;数据的具体实现在&lt;a href=&quot;https://github.com/redis/redis/blob/5.0/src/replication.c#L1141&quot;&gt;readSyncBulkPayload&lt;/a&gt;中。需要注意的是，当完成上面的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;RDB Full Resynchronization&lt;/code&gt; 流程后，&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave&lt;/code&gt;会变更为&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;REPL_STATE_CONNECTED&lt;/code&gt;状态，完成 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replication  handshake&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;从上述的过程可以看出 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replid + offset&lt;/code&gt; 是整个复制流程最核心的要素，下面会围绕它们去展开，来对实现细节进一步发掘。&lt;/p&gt;
+
+&lt;p&gt;在进入下一节前在此提出几个问题：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;replid 是如何产生的？它是如何在节点之间同步的？&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;offset时如何统计的？failover后，新的 master 节点是否会继承 failover 前的 offset 记录向继续向上递增？&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;backlog的作用是什么？节点在 slave 角色下是否会开启 backlog？&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;在发生 failover 后如何继续 psync？&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;replication-id&quot;&gt;Replication ID&lt;/h2&gt;
+
+&lt;p&gt;每一个 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt; 都拥有一个 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replication id&lt;/code&gt;（用一个巨大的随机数来标记指定的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dataset&lt;/code&gt; 的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;story&lt;/code&gt; ），&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt;向 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave node&lt;/code&gt; 每发送一个byte都会增加&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;offset&lt;/code&gt;，简单的说就是用&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replication id + offset&lt;/code&gt;构成一个同步状态的标识和记录。如上节所述当 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave node&lt;/code&gt; 连接到 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt; 进行 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replication handshake&lt;/code&gt; 时，使用 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PSYNC&lt;/code&gt; 命令将 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replication id + offset&lt;/code&gt; 发送给 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt;，&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt;可以根据该信息，只将更新的部分发送给 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave node&lt;/code&gt; 。&lt;/p&gt;
+
+&lt;p&gt;下面给出&lt;a href=&quot;https://github.com/redis/redis/blob/5.0/src/server.h#L942&quot;&gt;redisServer&lt;/a&gt;中与数据同步相关的部分字段：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-C&quot;&gt;
+struct redisServer{
+    ... ...
+    /* Replication (master) */
+    char replid[CONFIG_RUN_ID_SIZE+1];  /* 当前的 replication ID. */
+    char replid2[CONFIG_RUN_ID_SIZE+1]; /* 继承自 failover 前的 master*/
+    long long master_repl_offset;   /* 当前的 replication offset */
+    long long second_replid_offset; /* 对于 replid2 可以接受的最大偏移量上限. */
+    ... ...
+    char *repl_backlog;             /* 用于部分同步的 backlog  */
+    long long repl_backlog_size;    /* backlog ringbuffer size */
+    long long repl_backlog_histlen; /* backlog 实际数据长度 */
+    long long repl_backlog_idx;     /* backlog ringbuffer 下一个写入位置.*/
+    long long repl_backlog_off;     /* backlog buffer的第一个字节对应 复制集“master offset”*/
+    ... ...
+    client *master;     /* 对应master的Client对象 */
+    client *cached_master; /* 为了用于 PSYNC 而缓存的 master client对象.*/
+    ... ...
+    // 下面两个字段是用于记录 PSYNC 过程中 master node 的 replid/offset
+    // 最终会把它们记录到 server-&amp;gt;master 对象中
+    char master_replid[CONFIG_RUN_ID_SIZE+1];  /* Master PSYNC runid. */
+    long long master_initial_offset;           /* Master PSYNC offset. */
+}
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt; 对于是否满足&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PSYNC&lt;/code&gt;的判断条件具体实现在&lt;a href=&quot;https://github.com/redis/redis/blob/5.0/src/replication.c#L448&quot;&gt;masterTryPartialResynchronization&lt;/a&gt;函数：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-C&quot;&gt;/* This function handles the PSYNC command from the point of view of a
+ * master receiving a request for partial resynchronization.
+ *
+ * On success return C_OK, otherwise C_ERR is returned and we proceed
+ * with the usual full resync. */
+int masterTryPartialResynchronization(client *c) {
+    ... ...
+     /* Is the replication ID of this master the same advertised by the wannabe
+     * slave via PSYNC? If the replication ID changed this master has a
+     * different replication history, and there is no way to continue.
+     *
+     * Note that there are two potentially valid replication IDs: the ID1
+     * and the ID2. The ID2 however is only valid up to a specific offset. */
+    if (strcasecmp(master_replid, server.replid) &amp;amp;&amp;amp;
+        (strcasecmp(master_replid, server.replid2) ||
+         psync_offset &amp;gt; server.second_replid_offset))
+    {
+        /* Run id &quot;?&quot; is used by slaves that want to force a full resync. */
+        if (master_replid[0] != '?') {
+            if (strcasecmp(master_replid, server.replid) &amp;amp;&amp;amp;
+                strcasecmp(master_replid, server.replid2))
+            {
+                serverLog(LL_NOTICE,&quot;Partial resynchronization not accepted: &quot;
+                    &quot;Replication ID mismatch (Replica asked for '%s', my &quot;
+                    &quot;replication IDs are '%s' and '%s')&quot;,
+                    master_replid, server.replid, server.replid2);
+            } else {
+                serverLog(LL_NOTICE,&quot;Partial resynchronization not accepted: &quot;
+                    &quot;Requested offset for second ID was %lld, but I can reply &quot;
+                    &quot;up to %lld&quot;, psync_offset, server.second_replid_offset);
+            }
+        } else {
+            serverLog(LL_NOTICE,&quot;Full resync requested by replica %s&quot;,
+                replicationGetSlaveName(c));
+        }
+        goto need_full_resync;
+    }
+    ... ...
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;在 redis 节点中通过 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;info replication&lt;/code&gt; 命令查询可能会看到两个 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replication id&lt;/code&gt; ：&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master&lt;/code&gt; 和 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;secondary&lt;/code&gt; ，两者作用分别如下：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;master : 当前的&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replication id&lt;/code&gt;，用于标识目前状态最新的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replicas&lt;/code&gt;；&lt;/li&gt;
+  &lt;li&gt;sencondary : &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;failover&lt;/code&gt; 前的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replication id&lt;/code&gt;，是节点在变更为主节点之前标识&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replicas&lt;/code&gt;的&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;id&lt;/code&gt;；&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;如果 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave node&lt;/code&gt; 的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replicationID&lt;/code&gt; 与 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replid&lt;/code&gt; 不同，同时与 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replid2&lt;/code&gt; 不同或 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;psync_offset &amp;gt; second_replid_offset&lt;/code&gt;，则执行全量同步。如果 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt; 是刚刚完成 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;failover&lt;/code&gt;由 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave node&lt;/code&gt; 切换而来，此时 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;second_replid_offset = master_repl_offset + 1&lt;/code&gt;（下文有详细阐述）。在redis集群中，当网络情况正常时（未发生集群网络分裂）&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;offset&lt;/code&gt; 最大的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave node&lt;/code&gt; 会被其他 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave nodes&lt;/code&gt; 选为新的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt;。此时其他的从节点发送 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PSYNC replicationID offset&lt;/code&gt; 过来，可以满足上述条件进入下面的流程：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-C&quot;&gt;    /* We still have the data our slave is asking for? */
+    if (!server.repl_backlog ||
+        psync_offset &amp;lt; server.repl_backlog_off ||
+        psync_offset &amp;gt; (server.repl_backlog_off + server.repl_backlog_histlen))
+    {
+        serverLog(LL_NOTICE,
+            &quot;Unable to partial resync with replica %s for lack of backlog (Replica request was: %lld).&quot;, replicationGetSlaveName(c), psync_offset);
+        if (psync_offset &amp;gt; server.master_repl_offset) {
+            serverLog(LL_WARNING,
+                &quot;Warning: replica %s tried to PSYNC with an offset that is greater than the master replication offset.&quot;, replicationGetSlaveName(c));
+        }
+        goto need_full_resync;
+    }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;当 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt; 没有开启 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt; 或 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;psync_offset&lt;/code&gt; 不在 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt; 范围内时，会直接触发全量同步。&lt;strong&gt;如果任意两个节点的&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replication id + offset&lt;/code&gt;相等，说明两个节点之间的数据相同&lt;/strong&gt;。整体的流程如下：&lt;/p&gt;
+
+&lt;p&gt;&lt;img class=&quot;mermaid&quot; src=&quot;https://mermaid.ink/svg/eyJjb2RlIjoiZ3JhcGggVEJcbnN0YXJ0KFttYXN0ZXIgdHJ5IHRvIFBTWU5DXSlcbmV4aXQoW2VuZF0pXG5wYXJzZXJbL3BhcnNlIG1hc3Rlcl9yZXBsaWQgYW5kIDxicj4gcHN5bmNfb2Zmc2V0IGZyb20gc2xhdmUuL11cbmZ1bGxzeW5jW1tmdWxsIHJlc3luY11dXG5jaGVja19yZXBsaWR7c2VydmVyLnJlcGxpZCA9PSA8YnI-IG1hc3Rlcl9yZXBsaWQgP31cbmNoZWNrX3JlcGxpZDJ7c2VydmVyLnJlcGxpZDIgIT0gbWFzdGVyX3JlcGxpZCBPciA8YnI-IHBzeW5jX29mZnNldCA-IDxicj4gc2VydmVyLnNlY29uZF9yZXBsaWRfb2Zmc2V0ID99XG5iYWNrbG9ne2VuYWJsZSBiYWNrbG9nP31cbmJhY2tsb2dfbWF0Y2h7cHN5bmNfb2Zmc2V0IDwgc2VydmVyLnJlcGxfYmFja2xvZ19vZmYgT3IgPGJyPiBwc3luY19vZmZzZXQgPiBzZXJ2ZXIucmVwbF9iYWNrbG9nX29mZiArIDxicj4gc2VydmVyLnJlcGxfYmFja2xvZ19oaXN0bGVuID99XG4lJS1cbnN0YXJ0LS0-cGFyc2VyLS0-Y2hlY2tfcmVwbGlkXG5jaGVja19yZXBsaWQtLT58Tm98Y2hlY2tfcmVwbGlkMlxuY2hlY2tfcmVwbGlkLS0-fFllc3xiYWNrbG9nXG5jaGVja19yZXBsaWQyLS0-fFllc3xmdWxsc3luY1xuY2hlY2tfcmVwbGlkMi0tPnxOb3xiYWNrbG9nXG5iYWNrbG9nLS0-fE5vfCBmdWxsc3luY1xuYmFja2xvZy0tPnxZZXN8IGJhY2tsb2dfbWF0Y2hcbmJhY2tsb2dfbWF0Y2gtLT58Tm98IGZ1bGxzeW5jXG5iYWNrbG9nX21hdGNoLS0-fFllc3wgZXhpdFxuZnVsbHN5bmMtLT4gZXhpdCIsIm1lcm1haWQiOm51bGx9&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;在发生主从切换后，&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave nodes&lt;/code&gt; 会向新的&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master&lt;/code&gt;发送旧的&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replication id + offset&lt;/code&gt;，此时新的&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master&lt;/code&gt;节点收到后会与&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master relication id&lt;/code&gt; 和 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;secondary replication id&lt;/code&gt;进行对比，如果对比发现&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave node&lt;/code&gt;发送的&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replication id + offset&lt;/code&gt;与 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;secondary replication id + offset&lt;/code&gt;匹配且偏差在一定安全范围，则不需要进行全量同步。&lt;/p&gt;
+
+&lt;p&gt;上面给出的是&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt;视角的处理流程，下面讲一下&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave node&lt;/code&gt;视角的处理流程。&lt;/p&gt;
+
+&lt;p&gt;在 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PSYNC&lt;/code&gt; 初始化的阶段（&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PSYNC handshark&lt;/code&gt;） &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave node&lt;/code&gt; 会调用 &lt;a href=&quot;https://github.com/redis/redis/blob/5.0/src/replication.c#L1483&quot;&gt;slaveTryPartialResynchronization(master_fd, 0)&lt;/a&gt; 函数将自己的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replicationID + offset&lt;/code&gt; 通过 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PSYNC&lt;/code&gt; 命令发送给 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt;，如果 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cached_master&lt;/code&gt; 无效，则发送 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PSYNC ? -1&lt;/code&gt; 给 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt; 会直接触发全量同步：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-C&quot;&gt;int slaveTryPartialResynchronization(int fd, int read_reply) {
+    ... ...
+    if (!read_reply) {
+    /* Initially set master_initial_offset to -1 to mark the current
+        * master run_id and offset as not valid. Later if we'll be able to do
+        * a FULL resync using the PSYNC command we'll set the offset at the
+        * right value, so that this information will be propagated to the
+        * client structure representing the master into server.master. */
+        server.master_initial_offset = -1;
+
+        if (server.cached_master) {
+            psync_replid = server.cached_master-&amp;gt;replid;
+            snprintf(psync_offset,sizeof(psync_offset),&quot;%lld&quot;, server.cached_master-&amp;gt;reploff+1);
+            serverLog(LL_NOTICE,&quot;Trying a partial resynchronization (request %s:%s).&quot;, psync_replid, psync_offset);
+        } else {
+            serverLog(LL_NOTICE,&quot;Partial resynchronization not possible (no cached master)&quot;);
+            psync_replid = &quot;?&quot;;
+            memcpy(psync_offset,&quot;-1&quot;,3);
+        }
+
+        /* Issue the PSYNC command */
+        reply = sendSynchronousCommand(SYNC_CMD_WRITE,fd,&quot;PSYNC&quot;,psync_replid,psync_offset,NULL);
+        if (reply != NULL) {
+            serverLog(LL_WARNING,&quot;Unable to send PSYNC to master: %s&quot;,reply);
+            sdsfree(reply);
+            aeDeleteFileEvent(server.el,fd,AE_READABLE);
+            return PSYNC_WRITE_ERROR;
+        }
+        return PSYNC_WAIT_REPLY;
+    }
+    ... ...
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;在接收&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt; 应答时，会调用&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slaveTryPartialResynchronization(master_fd, 1)&lt;/code&gt;去解析服务端的响应：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-C&quot;&gt;int slaveTryPartialResynchronization(int fd, int read_reply) {
+    ... ...
+    if (!strncmp(reply,&quot;+FULLRESYNC&quot;,11)) { 
+        // 全量同步 
+        char *replid = NULL, *offset = NULL;
+
+        /* FULL RESYNC, parse the reply in order to extract the run id
+         * and the replication offset. */
+        ... ...
+        // 保留 master 发送的 replid
+        // server.master_replid = replid
+        memcpy(server.master_replid, replid, offset-replid-1);
+        server.master_replid[CONFIG_RUN_ID_SIZE] = '&amp;lt;!JEKYLL@46956357509320@153&amp;gt;';
+        // 保留 master 发送的 offset
+        // server.master_initial_offset = offset
+        server.master_initial_offset = strtoll(offset,NULL,10);
+        ... ...
+        return PSYNC_FULLRESYNC;
+    }
+
+    if (!strncmp(reply,&quot;+CONTINUE&quot;,9)) {
+        // 开启增量同步
+        ... ... 
+        // 比较 master 返回的 replid 与 slave 当前保留的 replid
+        // 在发生 failover 或 master 更新 replid 时会触发
+        if (strcmp(new,server.cached_master-&amp;gt;replid)) {
+            
+            /* Master ID changed. */
+            serverLog(LL_WARNING,&quot;Master replication ID changed to %s&quot;,new);
+
+            /* Set the old ID as our ID2, up to the current offset+1. */
+            // 保留 上一个周期的 replid
+            // server.replid2 = cached_master-&amp;gt;replid
+            memcpy(server.replid2,server.cached_master-&amp;gt;replid,
+                sizeof(server.replid2));
+            // 保留 上一个周期的 offset
+            server.second_replid_offset = server.master_repl_offset+1;
+
+            /* Update the cached master ID and our own primary ID to the
+                * new one. */
+            // 更新 replid
+            // server.replid = new replid
+            // server.cached_master-&amp;gt;replid = new replid
+            memcpy(server.replid,new,sizeof(server.replid));
+            memcpy(server.cached_master-&amp;gt;replid,new,sizeof(server.replid));
+
+            /* Disconnect all the sub-slaves: they need to be notified. */
+            disconnectSlaves();
+        }
+        ... ... 
+    }
+    ... ...
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;如果返回结果为 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;+FULLRESYNC&lt;/code&gt; 则直接更新&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master_replid&lt;/code&gt; 和 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master_initial_offset&lt;/code&gt;，后续进入全量同步流程；如果返回 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;+CONTINUE&lt;/code&gt; 说明可以进入增量同步流程，同时将 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt; 返回的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replid&lt;/code&gt; 与当前的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cached_master-&amp;gt;replid&lt;/code&gt; 进行比较，来决定是否更新 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;server.replid&lt;/code&gt; 和 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cached_master-&amp;gt;replid&lt;/code&gt;。整体流程如下：&lt;/p&gt;
+
+&lt;p&gt;&lt;img class=&quot;mermaid&quot; src=&quot;https://mermaid.ink/svg/eyJjb2RlIjoiZ3JhcGggVEJcbnN0YXJ0KFtzbGF2ZSB0cnkgdG8gUFNZTkNdKVxuZXhpdChbZW5kXSlcbiUlLVxuY2FjaGVke2NhY2hlZF9tYXN0ZXIgaXMgTlVMTCA_fVxuc3luY1svUFNZTkMgPyAtMS9dXG5wc3luY1svUFNZTkMgY2FjaGVkX21hc3Rlci0-cmVwbGlkIGNhY2hlZF9tYXN0ZXItPnJlcGxvZmYrMS9dXG5yZXNwb25zZVtbcmVjZWl2ZSBtYXN0ZXIgcmVzcG9uZV1dXG5zeW5jX3Jlc3sgK0ZVTExSRVNZTkMgcmVwbGlkIG9mZnNldCA_fVxudXBkYXRlX2Z1bGxbc2VydmVyLm1hc3Rlcl9pbml0aWFsX29mZnNldCA9IG9mZnNldDxicj5zZXJ2ZXIubWFzdGVyX3JlcGxpZCA9IHJlcGxpZF1cbnBzeW5jX3Jlc3sgK0NPTlRJTlVFRCByZXBsaWQgP31cbm5ld19wc3luY3sgY2FjaGVkX21hc3Rlci0-cmVwbGlkPGJyPj09IHJlcGxpZCA_fVxudXBkYXRlX3BzeW5jW3NlcnZlci5yZXBsaWQyPWNhY2hlZF9tYXN0ZXItPnJlcGxpZDxicj5zZXJ2ZXIuc2Vjb25kX3JlcGxpZF9vZmZzZXQgPSBzZXJ2ZXIubWFzdGVyX3JlcGxfb2Zmc2V0KzE8YnI-c2VydmVyLnJlcGxpZCA9IHJlcGxpZDxicj5jYWNoZWRfbWFzdGVyLT5yZXBsaWQgPSByZXBsaWQ8YnI-XVxuJSUtXG5zdGFydC0tPmNhY2hlZFxuY2FjaGVkLS0-fFllc3xwc3luYy0uLT5yZXNwb25zZVxuY2FjaGVkLS0-fE5vfHN5bmMtLi0-cmVzcG9uc2VcbnJlc3BvbnNlLS0-c3luY19yZXNcbiUlLVxuc3luY19yZXMtLT58WWVzfHVwZGF0ZV9mdWxsLS0-fGZ1bGwgcmVzeW5jfGV4aXRcbnN5bmNfcmVzLS0-fE5vfHBzeW5jX3Jlc1xuJSUtXG5wc3luY19yZXMtLT58WWVzfG5ld19wc3luY1xucHN5bmNfcmVzLS0-fE5vLCByZXRyeSBvciBub3Qgc3VwcG9ydGVkfGV4aXRcbiUlLVxubmV3X3BzeW5jLS0-fFllcywgcHN5bmN8ZXhpdFxubmV3X3BzeW5jLS0-fE5vfHVwZGF0ZV9wc3luYy0tPnxwc3luY3xleGl0IiwibWVybWFpZCI6bnVsbH0&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replid2&lt;/code&gt; 来源除上面提到的情况，还有一种情况是在发生&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;failover&lt;/code&gt;时，候选的&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave node&lt;/code&gt;主动保留上一轮的&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replicas id + offset&lt;/code&gt;，其具体实现在&lt;a href=&quot;https://github.com/redis/redis/blob/5.0/src/replication.c#L448&quot;&gt;replicationUnsetMaster&lt;/a&gt;函数，下面会阐述&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;failover&lt;/code&gt;时与&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;psync&lt;/code&gt;有关的细节。&lt;/p&gt;
+
+&lt;p&gt;在上述的流程中，参与&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PSYNC&lt;/code&gt;判断的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replid&lt;/code&gt;如下：
+master 视角：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;server.replid&lt;/li&gt;
+  &lt;li&gt;server.replid2&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;slave 视角：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;cached_master-&amp;gt;replid&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;server.replid&lt;/code&gt; 赋值来源：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;master 视角：
+    &lt;ol&gt;
+      &lt;li&gt;开启新的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replication story&lt;/code&gt;，生成新&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replid&lt;/code&gt;（详情见&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;changeReplicationId&lt;/code&gt; 函数）；&lt;/li&gt;
+      &lt;li&gt;节点可以在重启时使用 &lt;a href=&quot;https://github.com/redis/redis/blob/5.0/src/server.c#L4067&quot;&gt;loadDataFromDisk&lt;/a&gt;函数从 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;RDB&lt;/code&gt; 文件中恢复同步的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;metadata&lt;/code&gt;，对 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replid&lt;/code&gt; 进行初始化（将 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rsi.repl_id,&lt;/code&gt; 赋值给 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replid&lt;/code&gt;）；&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+  &lt;li&gt;slave 视角：
+    &lt;ol&gt;
+      &lt;li&gt;执行 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replication shake&lt;/code&gt;，当&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt;开启新的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replication story&lt;/code&gt;时，更新&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replid&lt;/code&gt;为&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;new replid&lt;/code&gt;（详情见&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slaveTryPartialResynchronization&lt;/code&gt;函数）；&lt;/li&gt;
+      &lt;li&gt;执行完 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;full resync&lt;/code&gt; 后将 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master-&amp;gt;replid&lt;/code&gt; 赋值给 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replid&lt;/code&gt; (详情见 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;readSyncBulkPayload&lt;/code&gt;)；&lt;/li&gt;
+      &lt;li&gt;节点可以在重启时使用 &lt;a href=&quot;https://github.com/redis/redis/blob/5.0/src/server.c#L4067&quot;&gt;loadDataFromDisk&lt;/a&gt;函数从 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;RDB&lt;/code&gt; 文件中恢复同步的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;metadata&lt;/code&gt;，对 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replid&lt;/code&gt; 进行初始化（将 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rsi.repl_id,&lt;/code&gt; 赋值给 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replid&lt;/code&gt;）；&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;server.replid2&lt;/code&gt; 赋值来源：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;master 视角：发生&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;failover&lt;/code&gt;，提升为&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt;，将上一轮的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;server.replid&lt;/code&gt;赋值给&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;server.replid2&lt;/code&gt;（详情见&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;shiftReplicationId&lt;/code&gt;函数）；&lt;/li&gt;
+  &lt;li&gt;slave 视角：执行 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replication shake&lt;/code&gt;，当&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt;开启新的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replication story&lt;/code&gt;时，将上一轮的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cached_master-&amp;gt;replid&lt;/code&gt;赋值给&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;server.replid2&lt;/code&gt;（详情见&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slaveTryPartialResynchronization&lt;/code&gt;函数）；&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cached_master-&amp;gt;replid&lt;/code&gt; 赋值来源：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;master 视角：发生 failover 后 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt; 切换为 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave node&lt;/code&gt;，将 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;service.replid&lt;/code&gt; 赋值给 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cached_master-&amp;gt;replid&lt;/code&gt;（此时为了与 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;new master node&lt;/code&gt; 执行 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replication handshake&lt;/code&gt;，以自身为蓝本创建一个 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cached_master&lt;/code&gt;，详情见&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replicationCacheMasterUsingMyself&lt;/code&gt;函数）；&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;slave 视角：&lt;/p&gt;
+    &lt;ol&gt;
+      &lt;li&gt;执行完 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;full resync&lt;/code&gt; 将 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master_replid&lt;/code&gt;（&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt; 通过 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;+FULLRESYNC&lt;/code&gt; 命令发送的&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replid&lt;/code&gt;） 赋值给 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master-&amp;gt;replid&lt;/code&gt;，当发生 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;failover&lt;/code&gt; 时 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master client&lt;/code&gt; 会被 cache 为&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cached_master client&lt;/code&gt;（详情见&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replicationCreateMasterClient&lt;/code&gt;函数）；&lt;/li&gt;
+      &lt;li&gt;执行 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replication shake&lt;/code&gt;，当&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt;开启新的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replication story&lt;/code&gt;时，更新&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cached_master-&amp;gt;replid&lt;/code&gt;为&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;new replid&lt;/code&gt;（详情见&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slaveTryPartialResynchronization&lt;/code&gt;函数）；&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/redis_psync_protocol/replid_trans.svg&quot; alt=&quot;replid 状态图&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;redisServer&lt;/code&gt;作为一个通用结构体，即会在 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave&lt;/code&gt; 角色下使用也会在 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master&lt;/code&gt; 角色下使用。在 failover 的情况下会发生角色的转换，所以要分两个视角阐述赋值来源。&lt;/p&gt;
+
+&lt;p&gt;同时要考虑另一种情况，即一个&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave node&lt;/code&gt;也可能存在依附于它的&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave node&lt;/code&gt;，所以弄清楚上面涉及的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replid&lt;/code&gt; 来源，也对下面针对这种情况的分析有好处。&lt;/p&gt;
+
+&lt;p&gt;到此可以回答上面提出的第一个问题：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;replid 是如何产生的？它是如何在节点之间同步的？&lt;/p&gt;
+
+    &lt;p&gt;replid是由随机函数生成的长达40bytes的id，它在replication shake 期间， &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt; 通过 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;+FULLRESYNC&lt;/code&gt; 或 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;+CONTINUE&lt;/code&gt; 命令发送给 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave node&lt;/code&gt;，&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave node&lt;/code&gt; 通过 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PSYNC&lt;/code&gt; 命令向 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt; 出示自己当前对应的 replicas id。&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;本节讲述了&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replid&lt;/code&gt;的产生、流转和作用，下面讲述 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replicas&lt;/code&gt; 中&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;offset&lt;/code&gt; 如何维持全局统计。&lt;/p&gt;
+
+&lt;h2 id=&quot;offset&quot;&gt;offset&lt;/h2&gt;
+
+&lt;p&gt;参与 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PSYNC&lt;/code&gt; 流程判断的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;offset&lt;/code&gt; 如下:&lt;/p&gt;
+
+&lt;p&gt;master 视角:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;server.second_replid_offset&lt;/li&gt;
+  &lt;li&gt;server.repl_backlog_off&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;slave 视角:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;cached_master-&amp;gt;reploff&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;cached_master-&amp;gt;reploff 赋值来源：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;slave 视角：
+    &lt;ol&gt;
+      &lt;li&gt;更新从 master 接收并成功执行的数据偏移量（详情见 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;processInputBuffer&lt;/code&gt; 函数）；&lt;/li&gt;
+      &lt;li&gt;执行完 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;fullresync&lt;/code&gt; 后将 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;server.master_initial_offset&lt;/code&gt; 赋值给 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master-&amp;gt;reploff&lt;/code&gt;（详情见 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replicationCreateMasterClient&lt;/code&gt; 函数）；&lt;/li&gt;
+    &lt;/ol&gt;
+
+    &lt;p&gt;注意：以上都是在 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master client&lt;/code&gt; 中得到的赋值，而后 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master client&lt;/code&gt; 转化为 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cached_master client&lt;/code&gt;。&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;server.second_replid_offset:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;master 视角:
+  在 failover 过程中，节点的角色由 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave&lt;/code&gt; 切换到 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master&lt;/code&gt; ，将 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;server.master_repl_offset+1&lt;/code&gt;赋值给&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;server.second_replid_offset&lt;/code&gt;（详情见 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;shiftReplicationId&lt;/code&gt; 函数）；&lt;/li&gt;
+  &lt;li&gt;slave 视角:
+ 执行 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replication shake&lt;/code&gt;，当&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt;开启新的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replication story&lt;/code&gt;时，将 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;server.master_repl_offset+1&lt;/code&gt;赋值给&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;server.second_replid_offset&lt;/code&gt; (详情见&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slaveTryPartialResynchronization&lt;/code&gt;函数）；&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;注意：将&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master_repl_offset+1&lt;/code&gt;赋值给 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;second_replid_offset&lt;/code&gt; 是由于 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave&lt;/code&gt; 会将它期望收到数据的首字节 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;offset&lt;/code&gt; 发给依附的&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt;。假设两个节点相同的数据为 50 bytes，则下次 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave&lt;/code&gt; 在 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PSYNC&lt;/code&gt;中发送的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;offset&lt;/code&gt; 为 51。&lt;/p&gt;
+
+&lt;p&gt;server.repl_backlog_off:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;master 视角:
+    &lt;ol&gt;
+      &lt;li&gt;开启了 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt; 时，会将接收到 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;client&lt;/code&gt; 端下发的命令缓冲在 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt; 中，将 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt; 中&lt;strong&gt;首字节的偏移量&lt;/strong&gt;赋值给 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;server.repl_backlog_off&lt;/code&gt;（详情见&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;feedReplicationBacklog&lt;/code&gt;函数）；&lt;/li&gt;
+      &lt;li&gt;在创建 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt; 和 重置 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog size&lt;/code&gt; 时，将&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master_repl_offset+1&lt;/code&gt; 赋值给 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;server.repl_backlog_off&lt;/code&gt;（详情见&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;createReplicationBacklog&lt;/code&gt; 和 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;resizeReplicationBacklog&lt;/code&gt; 函数）；&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+  &lt;li&gt;slave 视角：
+    &lt;ol&gt;
+      &lt;li&gt;开启了 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt; 时，会将接收到的&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master&lt;/code&gt; 端同步的数据缓冲在 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt; 中，将 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt; 中&lt;strong&gt;首字节的偏移量&lt;/strong&gt;赋值给 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;server.repl_backlog_off&lt;/code&gt;（详情见&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;feedReplicationBacklog&lt;/code&gt;函数）；&lt;/li&gt;
+      &lt;li&gt;在创建 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt; 和 重置 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog size&lt;/code&gt; 时，将&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master_repl_offset+1&lt;/code&gt; 赋值给 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;server.repl_backlog_off&lt;/code&gt;（详情见&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;createReplicationBacklog&lt;/code&gt; 和 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;resizeReplicationBacklog&lt;/code&gt; 函数）；&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;上述的字段中依赖 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;server.master_repl_offset&lt;/code&gt;，其赋值来源如下：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;master 视角:
+    &lt;ol&gt;
+      &lt;li&gt;开启了 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt; 时，会将接收到 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;client&lt;/code&gt; 端下发的命令缓冲在 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt; 中，将接收到数据的最末端byte对应的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;offset&lt;/code&gt; 赋值给 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;server.master_repl_offset&lt;/code&gt;(详情见&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;feedReplicationBacklog&lt;/code&gt;函数）；&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+  &lt;li&gt;slave 视角:
+    &lt;ol&gt;
+      &lt;li&gt;开启了 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt; 时，会将接收到的&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master&lt;/code&gt; 端同步的数据缓冲在 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt; 中，将接收到数据的最末端byte对应的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;offset&lt;/code&gt; 赋值给 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;server.master_repl_offset&lt;/code&gt;(详情见&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;feedReplicationBacklog&lt;/code&gt;函数）；&lt;/li&gt;
+      &lt;li&gt;完成 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;full resync&lt;/code&gt; 后将 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;server.master-&amp;gt;reploff&lt;/code&gt; 赋值给 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;server.master_repl_offset&lt;/code&gt;(详情见 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;readSyncBulkPayload&lt;/code&gt; 函数)；&lt;/li&gt;
+      &lt;li&gt;节点可以在重启时使用 &lt;a href=&quot;https://github.com/redis/redis/blob/5.0/src/server.c#L4067&quot;&gt;loadDataFromDisk&lt;/a&gt;函数从 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;RDB&lt;/code&gt; 文件中恢复同步的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;metadata&lt;/code&gt;，对 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master_repl_offset&lt;/code&gt; 进行初始化（将 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;repl_offset&lt;/code&gt; 赋值给 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master_repl_offset&lt;/code&gt;）
+  注意: redis节点重启后，replication meta 数据可以从 RDB 文件中恢复，当使用 Aof 格式的日志格式时无法支持此功能。可以使用&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;SHUT DOWN&lt;/code&gt;命令去关闭节点同时生成一个 RDB 文件，这在节点更新的时候很有用，在重启恢复内存后可以使用部分同步继续更新数据（在条件满足的情况下）。&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;当发生 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;failover&lt;/code&gt; 时，提升 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave&lt;/code&gt; 到 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master&lt;/code&gt; 的过程中 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master_repl_offset&lt;/code&gt; 不会被修改，即&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;new master&lt;/code&gt; 会延续之前的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;offset&lt;/code&gt; 继续递增。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/redis_psync_protocol/reploff_trans.svg&quot; alt=&quot;reploff 状态图&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;至此可以回答上面第二个问题：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;offset是如何统计的？failover后，新的 master 节点是否会继承 failover 前的 offset 记录向继续向上递增？&lt;/p&gt;
+
+    &lt;p&gt;redisServer 中有多处 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;offset&lt;/code&gt;，对于 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master&lt;/code&gt; 而言最重要的是&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master_repl_offset&lt;/code&gt;，这是用于记录当前同步数据的最高水位，在向 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt;中写入数据时会按 data_bytes_len 向上累加 ；对于 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave&lt;/code&gt; 而言最重要的是 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master-&amp;gt;reploff&lt;/code&gt;，这是用于记录同步完成（即已经被成功执行）数据的最高水位，会按同步成功数据的 data_bytes_len 向上累加。&lt;/p&gt;
+
+    &lt;p&gt;在 failover 后，&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;new master&lt;/code&gt; 会继承上一轮的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;offset&lt;/code&gt; 继续向上累加。&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;backlog&quot;&gt;backlog&lt;/h2&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt; 的是一个基于连续内存的&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ringbuff&lt;/code&gt;，下面简单讲解一下它的实现。&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;初始化一个 size 为 10 的&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt;，如下图所示：&lt;/p&gt;
+
+    &lt;p&gt;&lt;img src=&quot;/assets/images/redis_psync_protocol/backlog_init.svg&quot; alt=&quot;backlog_init 图&quot; /&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;向其中写入 5 bytes 数据，如下图所示：&lt;/p&gt;
+
+    &lt;p&gt;&lt;img src=&quot;/assets/images/redis_psync_protocol/backlog_write.svg&quot; alt=&quot;backlog_write 图&quot; /&gt;&lt;/p&gt;
+
+    &lt;p&gt;此时&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt;尚未写满，&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog_off&lt;/code&gt;不会发生变动。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;继续向其中写入 8 bytes 数据，如下图所示：&lt;/p&gt;
+
+    &lt;p&gt;&lt;img src=&quot;/assets/images/redis_psync_protocol/backlog_write_1.svg&quot; alt=&quot;backlog_write1 图&quot; /&gt;&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;其具体实现如下：&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-C&quot;&gt;/* Add data to the replication backlog.
+ * This function also increments the global replication offset stored at
+ * server.master_repl_offset, because there is no case where we want to feed
+ * the backlog without incrementing the offset. */
+void feedReplicationBacklog(void *ptr, size_t len) {
+    unsigned char *p = ptr;
+
+    server.master_repl_offset += len;
+
+    /* This is a circular buffer, so write as much data we can at every
+     * iteration and rewind the &quot;idx&quot; index if we reach the limit. */
+    while(len) {
+        size_t thislen = server.repl_backlog_size - server.repl_backlog_idx;
+        if (thislen &amp;gt; len) thislen = len;
+        memcpy(server.repl_backlog+server.repl_backlog_idx,p,thislen);
+        server.repl_backlog_idx += thislen;
+        if (server.repl_backlog_idx == server.repl_backlog_size)
+            server.repl_backlog_idx = 0;
+        len -= thislen;
+        p += thislen;
+        server.repl_backlog_histlen += thislen;
+    }
+    if (server.repl_backlog_histlen &amp;gt; server.repl_backlog_size)
+        server.repl_backlog_histlen = server.repl_backlog_size;
+    /* Set the offset of the first byte we have in the backlog. */
+    server.repl_backlog_off = server.master_repl_offset -
+                              server.repl_backlog_histlen + 1;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;对于 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master&lt;/code&gt; 和 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave&lt;/code&gt; 角色的节点而言，只有在调用 &lt;a href=&quot;https://github.com/redis/redis/blob/5.0/src/replication.c#L127&quot;&gt;feedReplicationBacklog&lt;/a&gt; 函数时会增长该字段，即只有在向 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt; 中添加数据的时候。&lt;/p&gt;
+
+&lt;p&gt;不同的是 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master&lt;/code&gt; 是在接收客户端命令时会在 &lt;a href=&quot;https://github.com/redis/redis/blob/5.0/src/replication.c#L174&quot;&gt;replicationFeedSlaves&lt;/a&gt; 函数中执行 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt; 备份，&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave&lt;/code&gt; 是在 &lt;a href=&quot;https://github.com/redis/redis/blob/5.0/src/replication.c#L279&quot;&gt;replicationFeedSlavesFromMasterStream&lt;/a&gt; 函数中执行备份，用于支持依附在该节点上的  &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sub-slaves&lt;/code&gt; 的部分同步需求。&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-C&quot;&gt;/* Propagate write commands to slaves, and populate the replication backlog
+ * as well. This function is used if the instance is a master: we use
+ * the commands received by our clients in order to create the replication
+ * stream. Instead if the instance is a slave and has sub-slaves attached,
+ * we use replicationFeedSlavesFromMaster() */
+void replicationFeedSlaves(list *slaves, int dictid, robj **argv, int argc) {
+    ... ...
+}
+
+/* This function is used in order to proxy what we receive from our master
+ * to our sub-slaves. */
+#include &amp;lt;ctype.h&amp;gt;
+void replicationFeedSlavesFromMasterStream(list *slaves, char *buf, size_t buflen) {
+    ... ...
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;backlog的创建是通过 &lt;a href=&quot;https://github.com/redis/redis/blob/5.0/src/replication.c#L78&quot;&gt;createReplicationBacklog&lt;/a&gt; 函数：&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-C&quot;&gt;void createReplicationBacklog(void) {
+    serverAssert(server.repl_backlog == NULL);
+    server.repl_backlog = zmalloc(server.repl_backlog_size);
+    server.repl_backlog_histlen = 0;
+    server.repl_backlog_idx = 0;
+
+    /* We don't have any data inside our buffer, but virtually the first
+     * byte we have is the next byte that will be generated for the
+     * replication stream. */
+    server.repl_backlog_off = server.master_repl_offset+1;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;其调用的场景如下：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;syncCommand&lt;/code&gt;函数：执行 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PSYNC&lt;/code&gt; 命令，当前&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog ==NULL &amp;amp;&amp;amp; listLength(server.slaves) == 1&lt;/code&gt;，则创建 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt;：&lt;/p&gt;
+
+    &lt;pre&gt;&lt;code class=&quot;language-C&quot;&gt; // 此时进入 FULLRESYNC 后续流程
+ c-&amp;gt;flags |= CLIENT_SLAVE;
+ listAddNodeTail(server.slaves,c);
+
+ /* Create the replication backlog if needed. */
+ // 当 backlog 为空，且当前 client 是唯一的 slave，初始化 backlog；
+ if (listLength(server.slaves) == 1 &amp;amp;&amp;amp; server.repl_backlog == NULL) {
+     /* 因为新的backlog没有与过去相关的历史记录，
+      * 所以在创建新的backlog的同时去更新replid并清理replid2 */
+     changeReplicationId();
+     clearReplicationId2();
+     createReplicationBacklog();
+ }
+&lt;/code&gt;&lt;/pre&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;readSyncBulkPayload&lt;/code&gt;函数：执行完全量同步后开启&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt;：&lt;/p&gt;
+
+    &lt;pre&gt;&lt;code class=&quot;language-C&quot;&gt; if (eof_reached) {
+     ... ...
+     /* slave node 是否需要创建 backlog 
+      * 与是否有 sub-slaves node 无关，开启 
+      * backlog 主要是为了在切换为 master 时可以
+      * 支持 psync. */
+     if (server.repl_backlog == NULL) createReplicationBacklog();
+     ... ...
+ }
+&lt;/code&gt;&lt;/pre&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slaveTryPartialResynchronization&lt;/code&gt; 函数：尝试执行部分同步，在返回&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;+CONTINUE&lt;/code&gt; 后初始化 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt;：&lt;/p&gt;
+    &lt;pre&gt;&lt;code class=&quot;language-C&quot;&gt; if (!strncmp(reply,&quot;+CONTINUE&quot;,9)) {
+     ... ...
+      /* 即使实例重启后从RDB文件中恢复了PSYNC metadata，
+       * 也无法初始化 backlog，需要创建它*/
+     if (server.repl_backlog == NULL) createReplicationBacklog();
+     return PSYNC_CONTINUE;
+ }
+&lt;/code&gt;&lt;/pre&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;综上对于 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master&lt;/code&gt; 而言，某些情况可能会不开启 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt;；对于 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave&lt;/code&gt; 而言无论是否有&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sub-slaves&lt;/code&gt; 都会开启 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt;（在支持PSYNC 协议的前提下）。&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt;的释放是通过 &lt;a href=&quot;https://github.com/redis/redis/blob/5.0/src/replication.c#L117&quot;&gt;freeReplicationBacklog&lt;/a&gt; 函数：&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-C&quot;&gt;void freeReplicationBacklog(void) {
+    serverAssert(listLength(server.slaves) == 0);
+    zfree(server.repl_backlog);
+    server.repl_backlog = NULL;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;其调用场景如下：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replicationCron&lt;/code&gt; 函数：当master没有slave且超过一段时间（&lt;strong&gt;由配置指定，如果为0则不会被释放&lt;/strong&gt;）后，会释放&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt;空间：&lt;/p&gt;
+
+    &lt;pre&gt;&lt;code class=&quot;language-C&quot;&gt; ... ...
+ /* 如果一个master 没有 slaves，
+  * 为了节省内存可以在一定时间过后回释放`backlog`占用的内存，
+  * 但是 slave 不可以执行这种操作。 */
+ if (listLength(server.slaves) == 0 &amp;amp;&amp;amp; server.repl_backlog_time_limit &amp;amp;&amp;amp;
+     server.repl_backlog &amp;amp;&amp;amp; server.masterhost == NULL)
+ {
+     time_t idle = server.unixtime - server.repl_no_slaves_since;
+
+     if (idle &amp;gt; server.repl_backlog_time_limit) {
+         /* 当释放 backlog的时候，需要更新 replid 并清理 replid2。
+          * 当backlog不存在时 master_repl_offset 无法更新，
+          * 如果此时仍然保持replid不变可能会造成以下的问题：
+          * 1. 当前角色为 master
+          * 2. 某个 slave 被切换为 new master，
+          * 它的 replid2 与 当前 replid 相同
+          * 3. 此时仍然是 master 未切换为 slave，并接收了写入命令，
+          * 但是 master_repl_offset 没有更新
+          * 4. 切换为 slave，由于接受了写入此时数据不一致，
+          * 此时向 new master 发起 PSYNC 请求会被接受，
+          * 返回 +CONTINUE new_replid。
+         */
+         changeReplicationId();
+         clearReplicationId2();
+         freeReplicationBacklog();
+         serverLog(LL_NOTICE,
+             &quot;Replication backlog freed after %d seconds &quot;
+             &quot;without connected replicas.&quot;,
+             (int) server.repl_backlog_time_limit);
+     }
+ }
+&lt;/code&gt;&lt;/pre&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;syncWithMaster&lt;/code&gt;函数：当 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave&lt;/code&gt; 执行 PSYNC 失败（由于master不支持，或者校验未通过），需要清理 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt;，强制 sub-slaves 执行 resync。&lt;/p&gt;
+    &lt;pre&gt;&lt;code class=&quot;language-C&quot;&gt;     ... ...
+     if (psync_result == PSYNC_CONTINUE) {
+         serverLog(LL_NOTICE, &quot;MASTER &amp;lt;-&amp;gt; REPLICA sync: Master accepted a Partial Resynchronization.&quot;);
+         return;
+     }
+
+     /* 当 PSYNC 失败或不支持时，如果当前节点有 sub-slaves，
+      * 则希望 sub-slaves 与 当前节点一起执行 resync。
+      * master 可能传输给当前节点完全不同的data set，
+      * 此时无法再去为sub-slaves 提供增量同步的服务。 */
+     disconnectSlaves(); /* 强制 sub-slaves 执行 resync. */
+     freeReplicationBacklog(); /* 释放 backlog，使得  sub-slaves 无法执行 PSYNC. */
+     ... ...
+&lt;/code&gt;&lt;/pre&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt; 的size调整是通过&lt;a href=&quot;&quot;&gt;resizeReplicationBacklog&lt;/a&gt; 函数：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-C&quot;&gt;/* This function is called when the user modifies the replication backlog
+ * size at runtime. It is up to the function to both update the
+ * server.repl_backlog_size and to resize the buffer and setup it so that
+ * it contains the same data as the previous one (possibly less data, but
+ * the most recent bytes, or the same data and more free space in case the
+ * buffer is enlarged). */
+void resizeReplicationBacklog(long long newsize) {
+    if (newsize &amp;lt; CONFIG_REPL_BACKLOG_MIN_SIZE)
+        newsize = CONFIG_REPL_BACKLOG_MIN_SIZE; // 默认大小为 16*1024
+    if (server.repl_backlog_size == newsize) return;
+
+    server.repl_backlog_size = newsize;
+    if (server.repl_backlog != NULL) {
+        /* What we actually do is to flush the old buffer and realloc a new
+         * empty one. It will refill with new data incrementally.
+         * The reason is that copying a few gigabytes adds latency and even
+         * worse often we need to alloc additional space before freeing the
+         * old buffer. */
+        zfree(server.repl_backlog);
+        server.repl_backlog = zmalloc(server.repl_backlog_size);
+        server.repl_backlog_histlen = 0;
+        server.repl_backlog_idx = 0;
+        /* Next byte we have is... the next since the buffer is empty. */
+        server.repl_backlog_off = server.master_repl_offset+1;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;其调用场景如下：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;loadServerConfigFromString&lt;/code&gt;函数：启动时加载配置项 repl-backlog-size；&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;configSetCommand&lt;/code&gt;函数：通过 config set repl-backlog-size size 命令；&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;到此可以回答上面提出的第3个问题：&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;backlog的作用是什么？节点在 slave 角色下是否会开启 backlog？&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt; 用于缓存 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;client&lt;/code&gt; 下发命令去支持 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PSYNC&lt;/code&gt; 协议；&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave&lt;/code&gt; 也会开启 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;backlog&lt;/code&gt;，除了用于服务 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sub-slaves&lt;/code&gt;，还用于切换为主时提供&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PSYNC&lt;/code&gt;。&lt;/p&gt;
+
+&lt;h2 id=&quot;failover&quot;&gt;failover&lt;/h2&gt;
+
+&lt;p&gt;在这一小节主要专注于&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;failover&lt;/code&gt;过程中，与 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replications&lt;/code&gt; 相关的操作，failover的触发时机和选举机制会在其他章节中陈述。&lt;/p&gt;
+
+&lt;p&gt;当一个 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave&lt;/code&gt; 切换为 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master&lt;/code&gt; 时会执行 &lt;a href=&quot;https://github.com/redis/redis/blob/5.0/src/replication.c#L2018&quot;&gt;replicationUnsetMaster&lt;/a&gt; 函数来清理 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;old master&lt;/code&gt; 信息并生成自己成为 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;new master&lt;/code&gt; 的相关信息：&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-C&quot;&gt;
+/* 取消replications，设置自己为master. */
+void replicationUnsetMaster(void) {
+    if (server.masterhost == NULL) return; /* Nothing to do. */
+    sdsfree(server.masterhost);
+    server.masterhost = NULL;
+    /* 当一个 slave 切换为master时，
+     * 继承自前一任master的 replid 
+     * 赋值给 sencondary ID，同时为
+     * 新的 replication history 
+     * 创建一个 new replid。 */
+    shiftReplicationId();
+    if (server.master) freeClient(server.master);
+    replicationDiscardCachedMaster();
+    cancelReplicationHandshake();
+    /* 因为需要将当前 replid的变更传播给每一
+     * sub-slaves，所以与所有 sub-slaves
+     * 断开连接是必须的。
+     * 由于可以执行 `PSYNC`重新开启复制流，
+     * sub-slaves可快速重连. */
+    disconnectSlaves();
+    server.repl_state = REPL_STATE_NONE;
+
+    /*需要确保 new master 以一个 SELECT 语句重启复制流*/
+    server.slaveseldb = -1;
+    
+    /* 将当前时间视为没有 slaves 存在的起始时间，
+     * 这个时间点用于统计backlog 的生存时间。
+     * 如果不设置，当 slave 没有立即链接进来时，
+     * backlog 可能会在 replicationCron 中被释放掉。 */
+    server.repl_no_slaves_since = server.unixtime;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;综上，在&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave&lt;/code&gt; 提升为 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master&lt;/code&gt; 时执行的步骤如下：&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;清理 master_host，备份并生成新的 replid；&lt;/li&gt;
+  &lt;li&gt;释放 master 和 cached master client；&lt;/li&gt;
+  &lt;li&gt;取消 replication shake；&lt;/li&gt;
+  &lt;li&gt;与所有的 sub-slaves 断开链接；&lt;/li&gt;
+  &lt;li&gt;清理 slaveseldb 状态，更新 slave 不存在的时间为当前时间；&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;该函数调用的时机如下：&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;clusterFailoverReplaceYourMaster：执行 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cluster failover&lt;/code&gt; 命令，或者执行自动故障转移（slave对应的master处于 FAIL 状态，发起自动故障转移）；&lt;/li&gt;
+  &lt;li&gt;clusterReset：执行 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cluster reset&lt;/code&gt; 命令；&lt;/li&gt;
+  &lt;li&gt;replicaofCommand：执行&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replicaof no one&lt;/code&gt; 命令；&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;当 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master&lt;/code&gt; 切换为 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave&lt;/code&gt; 时要执行&lt;a href=&quot;https://github.com/redis/redis/blob/5.0/src/replication.c#L1993&quot;&gt;replicationSetMaster&lt;/a&gt;函数，清理&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;relications&lt;/code&gt;的状态并利用自身信息创建&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cached_master&lt;/code&gt;：&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-C&quot;&gt;/* Set replication to the specified master address and port. */
+void replicationSetMaster(char *ip, int port) {
+    int was_master = server.masterhost == NULL;
+
+    // 赋值 master ip、port
+    sdsfree(server.masterhost);
+    server.masterhost = sdsnew(ip);
+    server.masterport = port;
+    if (server.master) { 
+        // 清理master client
+        freeClient(server.master);
+    }
+
+    /* 断开所有阻塞. */
+    disconnectAllBlockedClients(); 
+
+    /* 强迫slave 重新建立 replications stream，
+     *同步 replid 的更改。 */
+    // 断开所有slaves；
+    disconnectSlaves();
+    // 取消 replication handshake；
+    cancelReplicationHandshake();
+    if (was_master) {
+        // 清理 cached_master
+        replicationDiscardCachedMaster();
+        // 利用自身信息创建 cached master；
+        replicationCacheMasterUsingMyself();
+    }
+    // 重置当前 repl_state 为 REPL_STATE_CONNECT；
+    server.repl_state = REPL_STATE_CONNECT;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;综上 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master&lt;/code&gt; 切换为 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave&lt;/code&gt; 执行的步骤如下：&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;保存 new master 的 host 信息&lt;/li&gt;
+  &lt;li&gt;断开所有处于&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;CLIENT_BLOCKED&lt;/code&gt;状态的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;client&lt;/code&gt; ， 向它们发送一个&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-UNBLOCKED&lt;/code&gt;的错误；&lt;/li&gt;
+  &lt;li&gt;断开所有的&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slaves&lt;/code&gt;，强迫其重新执行同步流程，切换到新的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replication story&lt;/code&gt;；&lt;/li&gt;
+  &lt;li&gt;清理 cached_master，利用自身信息创建 cached_master 用于 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PSYNC&lt;/code&gt;；&lt;/li&gt;
+  &lt;li&gt;重置当前的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;repl_state&lt;/code&gt; 状态为 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;REPL_STATE_CONNECT&lt;/code&gt;；&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;该函数的调用时机如下：&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;clusterUpdateSlotsConfigWith：更新槽的配置，当一个&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt;没有对应槽去服务时，会被迁移为其他 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt;的&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave&lt;/code&gt;；当一个 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave node&lt;/code&gt; 的&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt;没有槽分配时，会被切换到其他的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slots owner&lt;/code&gt;；&lt;/li&gt;
+  &lt;li&gt;replicaofCommand：&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt;执行&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replicaof ip port&lt;/code&gt;命令，迁移为指定节点的&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave&lt;/code&gt;；&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;到此可以回答上面提出的第4个问题：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;在发生 failover 后如何继续 psync ？&lt;/p&gt;
+
+    &lt;p&gt;在发生 failover 后一个 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave node&lt;/code&gt; 会提升为 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt;(在哨兵模式下由哨兵选择一个&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave node&lt;/code&gt;切换为&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master node&lt;/code&gt;，以优先级高的优先，优先级相同的情况下以 offset 高的优先，offset 相同的情况下以节点号小的优先；在集群模式下由同复制集中的&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave nodes&lt;/code&gt;推举一个&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave node&lt;/code&gt;，以 offset 大的优先，再由其他&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master nodes&lt;/code&gt; 去认证，在取得大多数 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master nodes&lt;/code&gt; 认证后，完成切换。)，同时记录上一轮的 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replid&lt;/code&gt; 为&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;replid2&lt;/code&gt; 和 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;master_repl_offset+1&lt;/code&gt; 为 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;second_replid_offset&lt;/code&gt;（详情见&lt;a href=&quot;&quot;&gt;replicationUnsetMaster&lt;/a&gt;函数）。
+ 当其他 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;slave nodes&lt;/code&gt; 去向 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;new master node&lt;/code&gt; 发送&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PSYNC cache_master-&amp;gt;replid cache_master-&amp;gt;reloff+1&lt;/code&gt; 去完成 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;handshake&lt;/code&gt; 流程时，可以满足 &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;server.replid2 == master_replid &amp;amp;&amp;amp; psync_offset &amp;lt;=  server.second_replid_offset&lt;/code&gt; 的判断条件。&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;参考文档&quot;&gt;参考文档&lt;/h2&gt;
+
+&lt;p&gt;[1] 陈雷. Redis 5设计与源码分析, 北京, 机械工业出版社, July 2020&lt;/p&gt;
+
+&lt;p&gt;[2] Redis Ltd. Replication. Aguest 25 2020, https://redis.io/topics/replication&lt;/p&gt;</content><author><name>Zhipeng Wang</name><email>wangzhipenghyc@163.com</email></author><summary type="html"></summary></entry><entry><title type="html">Design_pattern</title><link href="http://localhost:4000/design_pattern/" rel="alternate" type="text/html" title="Design_pattern" /><published>2021-06-15T00:00:00+08:00</published><updated>2021-06-15T00:00:00+08:00</updated><id>http://localhost:4000/design_pattern</id><content type="html" xml:base="http://localhost:4000/design_pattern/">&lt;style&gt;
     p { font: 0.875rem YaHei !important; }
 &lt;/style&gt;
 
