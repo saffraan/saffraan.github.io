@@ -391,8 +391,9 @@
 <h2 id="creational-patterns">Creational patterns</h2>
 
 <h3 id="abstract-factory">Abstract factory</h3>
-<p>抽象工厂模式，提供一个用于创建相关或依赖对象族的接口，而无需指定其具体类。
-<strong>使用场景</strong>：当一个场景需要引入多个接口，尤其是针对不同资源要绑定不同的对象时。例如：一个<code class="language-plaintext highlighter-rouge">player</code>加入战场的时候要分配装备，而且不同<code class="language-plaintext highlighter-rouge">阵营</code>的<code class="language-plaintext highlighter-rouge">player</code> 分配的装备型号不同。
+<p>抽象工厂模式，提供一个用于创建相关或依赖对象族的接口，而无需指定其具体类。</p>
+
+<p><strong>使用场景</strong>：当一个场景需要引入多个接口，尤其是针对不同资源要绑定不同的对象时。例如：一个<code class="language-plaintext highlighter-rouge">player</code>加入战场的时候要分配装备，而且不同<code class="language-plaintext highlighter-rouge">阵营</code>的<code class="language-plaintext highlighter-rouge">player</code> 分配的装备型号不同。
 <img class="mermaid" src="https://mermaid.ink/svg/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG5jbGFzcyBGYWN0b3J5IHtcbkNyZWF0ZVRhbmsoKSBUYW5rXG5DcmVhdGVHdW4oKSBHdW5cbn1cbjw8aW50ZXJmYWNlPj4gRmFjdG9yeVxuJSUtXG5jbGFzcyBUYW5re1xuUnVuKClcbkZpcmUoKVxufVxuPDxpbnRlcmZhY2U-PiBUYW5rXG4lJS1cbmNsYXNzIEd1bntcblNob290KClcbn1cbjw8aW50ZXJmYWNlPj4gR3VuXG4lJS1cbmNsYXNzIHNvdmlldEZhY3Rvcnl7XG5DcmVhdGVUYW5rKCkgVGFua1xuQ3JlYXRlR3VuKCkgR3VuXG59XG4lJS1cbmNsYXNzIHQzNCB7XG4tdWludCBidWxsZXRcbi11aW50IGdhc1xuLXN0cmluZyBlbmdpbmVcblJ1bigpXG5GaXJlKClcbn1cbiUlLVxuY2xhc3MgYWs0NyB7XG4tdWludCBjbGlwXG5TaG9vdCgpXG59XG4lJS1cbmNsYXNzIGdlcm1hbnlGYWN0b3J5e1xuQ3JlYXRlVGFuaygpIFRhbmtcbkNyZWF0ZUd1bigpIEd1blxufVxuJSUtXG5jbGFzcyB0aWdlclRhbmt7XG4tdWludCBidWxsZXRcbi11aW50IGdhc1xuLXN0cmluZyBlbmdpbmVcblJ1bigpXG5GaXJlKClcbn1cbiUlLVxuY2xhc3MgbXA0MCB7XG4tdWludCBjbGlwXG5TaG9vdCgpXG59XG4lJS1cbkZhY3RvcnkgLi4-IFRhbmtcbkZhY3RvcnkgLi4-IEd1blxuJSUtXG5zb3ZpZXRGYWN0b3J5IC4ufD4gRmFjdG9yeVxuc292aWV0RmFjdG9yeSAuLj4gYWs0N1xuc292aWV0RmFjdG9yeSAuLj4gdDM0XG50MzQgLi58PiBUYW5rXG5hazQ3IC4ufD4gR3VuXG4lJS1cbmdlcm1hbnlGYWN0b3J5IC4ufD4gRmFjdG9yeVxuZ2VybWFueUZhY3RvcnkgLi4-IG1wNDBcbmdlcm1hbnlGYWN0b3J5IC4uPiB0aWdlclRhbmtcbnRpZ2VyVGFuayAuLnw-IFRhbmtcbm1wNDAgLi58PiBHdW4iLCJtZXJtYWlkIjpudWxsfQ"></p>
 
 <p>调用方不需要了解实例化过程和接口对应的实现类，只要能<code class="language-plaintext highlighter-rouge">Tank</code>可以开、<code class="language-plaintext highlighter-rouge">Gun</code>可以射击，他只需要找到正确的<code class="language-plaintext highlighter-rouge">factory</code>。golang的示例代码如下：</p>
@@ -517,8 +518,9 @@
 </ul>
 
 <h3 id="builder">Builder</h3>
-<p>构建器模式，将复杂对象的构造与其表示分开，从而允许相同的构造过程创建各种表示。
-<strong>使用场景</strong>：适用于构造一些初始化可变选项特别多的对象，而其中一些选项对某个资源是相同的。例如：<code class="language-plaintext highlighter-rouge">player</code>在注册游戏时创建了一个<code class="language-plaintext highlighter-rouge">role</code>，同时还可以选择不同的职业加入战场。
+<p>构建器模式，将复杂对象的构造与其表示分开，从而允许相同的构造过程创建各种表示。</p>
+
+<p><strong>使用场景</strong>：适用于构造一些初始化可变选项特别多的对象，而其中一些选项对某个资源是相同的。例如：<code class="language-plaintext highlighter-rouge">player</code>在注册游戏时创建了一个<code class="language-plaintext highlighter-rouge">role</code>，同时还可以选择不同的职业加入战场。
 <img class="mermaid" src="https://mermaid.ink/svg/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG5jbGFzcyBSb2xlQnVpbGRlcntcbk5hbWUoKVxuUG93ZXIoKVxuR2VuZGVyKClcbkhlYWRlckltYWdlKClcbn1cbjw8aW50ZXJmYWNlPj4gUm9sZUJ1aWxkZXJcbiUlLVxuY2xhc3MgUm9sZXtcbm5hbWVcbnBvd2VyXG5nZW5kZXJcbmhlYWRJbWFnZVxuc2tpbGxcbnNwZWVkXG5saWZlVmFsdWVcblNob3coKVxufVxuJSUtXG5jbGFzcyBTcGVjaWFsU29sZGllcntcbk5hbWUoKVxuUG93ZXIoKVxuR2VuZGVyKClcbkhlYWRlckltYWdlKClcbkdldFJvbGUoKSBSb2xlXG59XG4lJS1cbmNsYXNzIEFybW9yZWRTb2xkaWVye1xuTmFtZSgpXG5Qb3dlcigpXG5HZW5kZXIoKVxuSGVhZGVySW1hZ2UoKVxuR2V0Um9sZSgpIFJvbGVcbn1cbiUlLVxuY2xhc3MgRGlyZWN0b3J7XG5idWlsZGVyIFJvbGVCdWlsZGVyXG5Db25zdHJ1Y3QoKVxufVxuJSUtXG5EaXJlY3RvciAuLm8gUm9sZUJ1aWxkZXJcblNwZWNpYWxTb2xkaWVyIC4uPiBSb2xlXG5Bcm1vcmVkU29sZGllciAuLj4gUm9sZVxuQXJtb3JlZFNvbGRpZXIgLi58PiBSb2xlQnVpbGRlclxuU3BlY2lhbFNvbGRpZXIgLi58PiBSb2xlQnVpbGRlciIsIm1lcm1haWQiOm51bGx9"></p>
 
 <p>golang 的示例代码如下：</p>
@@ -668,8 +670,9 @@
 <p>这种使用方法一定要注意，在<code class="language-plaintext highlighter-rouge">GetRole()</code>时返回一个结构体而不是结构体指针，否则构建新对象时容易对已经构造的对象造成污染。使用这种方法的好处是，可以通过‘继承’前一个<code class="language-plaintext highlighter-rouge">builder</code>，减少大量重复的成员变量赋值，而且也是并发安全的。</p>
 
 <h3 id="dependency-injection">Dependency Injection</h3>
-<p>依赖注入模式，类通过一个注入器来代替直接创建依赖的对象，是增加代码可扩展性常用的手段。
-<strong>使用场景</strong>：简单的说调用方的实现依赖于某个类或服务，该类或服务是它实现上的一个有效组成部分，需要在初始化或者某个流程步骤将依赖类的对象传递给调用方。例如：<code class="language-plaintext highlighter-rouge">player</code>在一个游戏中需要切换不同的游戏模式。</p>
+<p>依赖注入模式，类通过一个注入器来代替直接创建依赖的对象，是增加代码可扩展性常用的手段。</p>
+
+<p><strong>使用场景</strong>：简单的说调用方的实现依赖于某个类或服务，该类或服务是它实现上的一个有效组成部分，需要在初始化或者某个流程步骤将依赖类的对象传递给调用方。例如：<code class="language-plaintext highlighter-rouge">player</code>在一个游戏中需要切换不同的游戏模式。</p>
 
 <p><img class="mermaid" src="https://mermaid.ink/svg/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG5jbGFzcyBQbGF5ZXJ7XG5zZXJ2aWNlIEdhbWVTZXJ2aWNlXG5Mb2dpbigpXG5TZXRTZXJ2aWNlKEdhbWVTZXJ2aWNlKVxufVxuJSUtXG5jbGFzcyBHYW1lU2VydmljZVNldHRlcntcblNldFNlcnZpY2UoR2FtZVNlcnZpY2UpXG59XG48PGludGVyZmFjZT4-IEdhbWVTZXJ2aWNlU2V0dGVyXG4lJS1cbmNsYXNzIEdhbWVTZXJ2aWNle1xuQXV0aCgpXG5TdGFydCgpXG59XG48PGludGVyZmFjZT4-IEdhbWVTZXJ2aWNlXG4lJS1cbmNsYXNzIExvY2FsU2VydmljZXtcbkF1dGgoKVxuU3RhcnQoKVxufVxuJSUtXG5jbGFzcyBPbmxpbmVTZXJ2aWNle1xuQXV0aCgpXG5TdGFydCgpXG59XG5Mb2NhbFNlcnZpY2UgLi58PiBHYW1lU2VydmljZVxuT25saW5lU2VydmljZSAuLnw-IEdhbWVTZXJ2aWNlXG5QbGF5ZXItLT5HYW1lU2VydmljZVxuR2FtZVNlcnZpY2VTZXR0ZXIuLj5HYW1lU2VydmljZVxuUGxheWVyLi58PkdhbWVTZXJ2aWNlU2V0dGVyIiwibWVybWFpZCI6bnVsbH0">
 golang的示例代码如下：</p>
@@ -3879,6 +3882,47 @@ ROUTINE ======================== main.main.func1 in /Users/wangzhipeng/workspace
     
     <h2 class="archive__item-title no_toc" itemprop="headline">
       
+        <a href="/redis_psync_protocol(1)/" rel="permalink">Redis_psync_protocol(1)
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          45 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">
+
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
         <a href="/redis_psync_protocol/" rel="permalink">Redis_psync_protocol
 </a>
       
@@ -3897,7 +3941,7 @@ ROUTINE ======================== main.main.func1 in /Users/wangzhipeng/workspace
       <span class="page__meta-readtime">
         <i class="far fa-clock" aria-hidden="true"></i>
         
-          13 minute read
+          14 minute read
         
       </span>
     
@@ -3993,7 +4037,7 @@ ROUTINE ======================== main.main.func1 in /Users/wangzhipeng/workspace
   </ul>
 </div>
 
-<div class="page__footer-copyright">© 2021 ZhipengWang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+<div class="page__footer-copyright">© 2022 ZhipengWang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
 
       </footer>
     </div>

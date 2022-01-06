@@ -16,4 +16,10 @@ var store = [{
         "tags": [],
         "url": "/redis_psync_protocol/",
         "teaser": null
+      },{
+        "title": "Redis_psync_protocol(1)",
+        "excerpt":"Redis psync protocol(续) 在上一篇 redis psync protocol 中详细的阐述了 psync 协议的交互流程和实现细节，本文主要是针对命令同步的细节和生产实践中遇到的场景进行一些补充。文中代码部分可以忽略，直接看相关结论。 命令同步 在 redis 的源码中包含多种 command flag，利用这些 flag 来标识 command 的属性： r(读)：读取数据，不会修改 key 数据； w(写)：写入数据，可能会修改 key 数据； m(内存)：可能会增长内存使用率，在 out of memory 时不允许使用； a(管理)：管理命令，例如 SHUTDOWN、SAVE 命令； p(发布订阅)：发布订阅相关的命令； f(强制同步)：无论是否修改 data set 都需要同步给 slave； s(非script)：在script中不支持的命令； l(loading)：在数据库加载数据时允许执行的命令； t(-)：当 slave 具有一些陈旧数据但是不允许使用该数据提供服务时，只有少数命令被允许执行； M(屏蔽monitor)：不会被自动传播给 monitor 的命令； k(ask)： 为此命令执行隐式...","categories": [],
+        "tags": [],
+        "url": "/redis_psync_protocol(1)/",
+        "teaser": null
       }]
