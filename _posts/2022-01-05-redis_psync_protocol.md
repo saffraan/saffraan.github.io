@@ -7,18 +7,18 @@ classes: wide
     p { font: 0.875rem YaHei !important; }
 </style>
 
-
 # Redis psync protocol
 
 redis老版本的同步协议是 `SYNC`，因为它不支持部分同步所以被`PSYNC`代替，发展出了 `psync1`协议。后续为优化由 `failover` 带来的不必要`full Resynchronization`，发展出了 `psync2` 协议。下面的内容是基于 `redis 5.0` 版本，剖析一下 `psync2` 协议的实现。
 
 ## replication handshake
+
 slave 与 master 之前发起同步的过程称为 **replication  handshake**， 在 `slave node` 的 [replicationCron](https://github.com/redis/redis/blob/5.0/src/replication.c#L2578) 任务（每秒调用一次）中会调用 `connectWithMaster -> registry file event[syncWithMaster -> slaveTryPartialResynchronization]` 函数与 `master node` 完成 `replication  handshake` 过程，具体的握手流程实现在[syncWithMaster](https://github.com/redis/redis/blob/5.0/src/replication.c#L1643)函数中。下面展示的是 `slave node`进入 `REPL_STATE_SEND_PSYNC`状态后的交互流程，在此之前，`slave` 和 `master`已经依次执行了如下流程：
 
 1. slave 向 master 发起 tcp 链接；
 2. slave 向 master 发送 `PING` 命令，master 响应是否需要AUTH，即返回 `-NOAUTH`，如果需要执行 3，否则跳转到 4；
 3. slave 向 master 发送 `AUTH masterauth`，master 响应是否认证成功；
-4. slave 发送 `REPLCONF listening-port port` （如果 `slave_announce_port` 不存在，则返发送`tcp listening port`）；如果`slave_announce_ip` 不为 NULL 则发送 `REPLCONF ip-address slave_announce_ip`
+4. slave 发送 `REPLCONF listening-port port` （如果 `slave_announce_port` 不存在，则发送`tcp listening port`）；如果`slave_announce_ip` 不为 NULL 则发送 `REPLCONF ip-address slave_announce_ip`
 5. slave 向 master 同步当前支持的能力，发送 `REPLCONF capa eof capa psync2`。
 
 从 1~5 过程中，slave 状态依次经过如下变迁： `REPL_STATE_NONE -> REPL_STATE_CONNECT -> REPL_STATE_CONNECTING -> REPL_STATE_RECEIVE_PONG -> REPL_STATE_SEND_AUTH -> REPL_STATE_RECEIVE_AUTH -> REPL_STATE_SEND_PORT -> REPL_STATE_RECEIVE_PORT -> REPL_STATE_SEND_IP -> REPL_STATE_RECEIVE_IP -> REPL_STATE_SEND_CAPA -> REPL_STATE_RECEIVE_CAPA -> REPL_STATE_RECEIVE_PSYNC`
@@ -77,6 +77,8 @@ sequenceDiagram
 
 当 `master node` 所在宿主机的磁盘读写速度较慢时，会对`master node`带来额外的压力，为了解决这个问题，在2.8.18以后的版本支持不使用磁盘作为中间存储的介质，直接在`backend process`中通过网络发送到给其他的`slave nodes`（前提是在 `slave nodes` 支持 `eof capability` 的情况下，在 `replication shake`过程中通过 `REPLCONF`命令同步 `slave capability`），可以通过`repl-diskless-sync`开启这个选项。**在diskless模式下，为了延迟几秒等待更多的slave nodes 全量同步请求到达，backend process不会立即创建， 而是放在 replicationCron()中被创建**，如果已经被启动，则需要等待下一个 `BGSAVE` 或 `SYNC`(详情见[syncCommand](https://github.com/redis/redis/blob/5.0/src/replication.c#L629)函数)。
 
+`backend save process`执行同步的结果（与slave全量同步是否成功）会通过`pipe`被父进程（服务进程）接收，服务进程根据返回结果来决定对每个slave同步的后续处理流程（是否进入增量同步流程）[^3]。
+
 `master` 判断是否直接通过 `socket` 发送 `RDB` 数据的代码 [startBgsaveForReplication](https://github.com/redis/redis/blob/5.0/src/replication.c#L564) 如下：
 
 ``` C
@@ -123,7 +125,6 @@ int startBgsaveForReplication(int mincapa) {
 
 4. 在发生 failover 后如何继续 psync？
 
-
 ## Replication ID
 
 每一个 `master node` 都拥有一个 `replication id`（用一个巨大的随机数来标记指定的 `dataset` 的 `story` ），`master node`向 `slave node` 每发送一个byte都会增加`offset`，简单的说就是用`replication id + offset`构成一个同步状态的标识和记录。如上节所述当 `slave node` 连接到 `master node` 进行 `replication handshake` 时，使用 `PSYNC` 命令将 `replication id + offset` 发送给 `master node`，`master node`可以根据该信息，只将更新的部分发送给 `slave node` 。
@@ -131,6 +132,7 @@ int startBgsaveForReplication(int mincapa) {
 下面给出[redisServer](https://github.com/redis/redis/blob/5.0/src/server.h#L942)中与数据同步相关的部分字段：
 
 ``` C
+#define CONFIG_RUN_ID_SIZE 40
 
 struct redisServer{
     ... ...
@@ -206,8 +208,7 @@ int masterTryPartialResynchronization(client *c) {
 + master : 当前的`replication id`，用于标识目前状态最新的 `replicas`；
 + sencondary : `failover` 前的 `replication id`，是节点在变更为主节点之前标识`replicas`的`id`；
 
-如果 `slave node` 的 `replicationID` 与 `replid` 不同，同时与 `replid2` 不同或 `psync_offset > second_replid_offset`，则执行全量同步。如果 `master node` 是刚刚完成 `failover`由 `slave node` 切换而来，此时 `second_replid_offset = master_repl_offset + 1`（下文有详细阐述）。在redis集群中，当网络情况正常时（未发生集群网络分裂）`offset` 最大的 `slave node` 会被其他 `slave nodes` 选为新的 `master node`。此时其他的从节点发送 `PSYNC replicationID offset` 过来，可以满足上述条件进入下面的流程：
-
+如果 `slave node` 的 `replicationID` 与 `replid` 不同，同时与 `replid2` 不同或 `psync_offset > second_replid_offset`，则执行全量同步。如果 `master node` 是刚刚完成 `failover`由 `slave node` 切换而来，此时 `second_replid_offset = master_repl_offset + 1`（下文有详细阐述）。在redis集群中，当网络情况正常时（未发生集群网络分裂）`offset` 最大的 `slave node` 会被其他 `slave nodes` 选为新的 `master node`。此时其他的从节点发送 `PSYNC replicationID offset` 过来，可以避免跳转到全量同步进入下面的流程：
 
 ``` C
     /* We still have the data our slave is asking for? */
@@ -349,6 +350,7 @@ int slaveTryPartialResynchronization(int fd, int read_reply) {
     ... ...
 }
 ```
+
 如果返回结果为 `+FULLRESYNC` 则直接更新`master_replid` 和 `master_initial_offset`，后续进入全量同步流程；如果返回 `+CONTINUE` 说明可以进入增量同步流程，同时将 `master node` 返回的 `replid` 与当前的 `cached_master->replid` 进行比较，来决定是否更新 `server.replid` 和 `cached_master->replid`。整体流程如下：
 
 ``` mermaid!
@@ -385,13 +387,16 @@ graph TB
 
 在上述的流程中，参与`PSYNC`判断的 `replid`如下：
 master 视角：
+
 + server.replid
 + server.replid2
 
 slave 视角：
+
 + cached_master->replid
 
 `server.replid` 赋值来源：
+
 + master 视角：
     1. 开启新的 `replication story`，生成新`replid`（详情见`changeReplicationId` 函数）；
     2. 节点可以在重启时使用 [loadDataFromDisk](https://github.com/redis/redis/blob/5.0/src/server.c#L4067)函数从 `RDB` 文件中恢复同步的 `metadata`，对 `replid` 进行初始化（将 `rsi.repl_id,` 赋值给 `replid`）；
@@ -401,10 +406,12 @@ slave 视角：
     3. 节点可以在重启时使用 [loadDataFromDisk](https://github.com/redis/redis/blob/5.0/src/server.c#L4067)函数从 `RDB` 文件中恢复同步的 `metadata`，对 `replid` 进行初始化（将 `rsi.repl_id,` 赋值给 `replid`）；
 
 `server.replid2` 赋值来源：
+
 + master 视角：发生`failover`，提升为`master node`，将上一轮的 `server.replid`赋值给`server.replid2`（详情见`shiftReplicationId`函数）；
 + slave 视角：执行 `replication shake`，当`master node`开启新的 `replication story`时，将上一轮的 `cached_master->replid`赋值给`server.replid2`（详情见`slaveTryPartialResynchronization`函数）；
 
 `cached_master->replid` 赋值来源：
+
 + master 视角：发生 failover 后 `master node` 切换为 `slave node`，将 `service.replid` 赋值给 `cached_master->replid`（此时为了与 `new master node` 执行 `replication handshake`，以自身为蓝本创建一个 `cached_master`，详情见`replicationCacheMasterUsingMyself`函数）；
 
 + slave 视角：
@@ -427,47 +434,54 @@ slave 视角：
 
 ## offset
 
-参与 `PSYNC` 流程判断的 `offset` 如下:
+参与 `PSYNC` 流程判断的 `offset` 如下：
 
-master 视角:
-+ server.second_replid_offset 
+master 视角：
+
++ server.second_replid_offset
 + server.repl_backlog_off
 
-slave 视角:
+slave 视角：
+
 + cached_master->reploff
 
 cached_master->reploff 赋值来源：
+
 + slave 视角：
     1. 更新从 master 接收并成功执行的数据偏移量（详情见 `processInputBuffer` 函数）；
     2. 执行完 `fullresync` 后将 `server.master_initial_offset` 赋值给 `master->reploff`（详情见 `replicationCreateMasterClient` 函数）；
-    
+
     注意：以上都是在 `master client` 中得到的赋值，而后 `master client` 转化为 `cached_master client`。
 
-server.second_replid_offset:
-+ master 视角:
+server.second_replid_offset：
+
++ master 视角：
     在 failover 过程中，节点的角色由 `slave` 切换到 `master` ，将 `server.master_repl_offset+1`赋值给`server.second_replid_offset`（详情见 `shiftReplicationId` 函数）；
-+ slave 视角:
++ slave 视角：
    执行 `replication shake`，当`master node`开启新的 `replication story`时，将 `server.master_repl_offset+1`赋值给`server.second_replid_offset` (详情见`slaveTryPartialResynchronization`函数）；
 
 注意：将`master_repl_offset+1`赋值给 `second_replid_offset` 是由于 `slave` 会将它期望收到数据的首字节 `offset` 发给依附的`master node`。假设两个节点相同的数据为 50 bytes，则下次 `slave` 在 `PSYNC`中发送的 `offset` 为 51。
 
-server.repl_backlog_off:
-+ master 视角:
+server.repl_backlog_off：
+
++ master 视角：
     1. 开启了 `backlog` 时，会将接收到 `client` 端下发的命令缓冲在 `backlog` 中，将 `backlog` 中**首字节的偏移量**赋值给 `server.repl_backlog_off`（详情见`feedReplicationBacklog`函数）；
+
     2. 在创建 `backlog` 和 重置 `backlog size` 时，将`master_repl_offset+1` 赋值给 `server.repl_backlog_off`（详情见`createReplicationBacklog` 和 `resizeReplicationBacklog` 函数）；
 + slave 视角：
     1. 开启了 `backlog` 时，会将接收到的`master` 端同步的数据缓冲在 `backlog` 中，将 `backlog` 中**首字节的偏移量**赋值给 `server.repl_backlog_off`（详情见`feedReplicationBacklog`函数）；
+
     2. 在创建 `backlog` 和 重置 `backlog size` 时，将`master_repl_offset+1` 赋值给 `server.repl_backlog_off`（详情见`createReplicationBacklog` 和 `resizeReplicationBacklog` 函数）；
 
 上述的字段中依赖 `server.master_repl_offset`，其赋值来源如下：
 
-+ master 视角:
-    1. 开启了 `backlog` 时，会将接收到 `client` 端下发的命令缓冲在 `backlog` 中，将接收到数据的最末端byte对应的 `offset` 赋值给 `server.master_repl_offset`(详情见`feedReplicationBacklog`函数）；
-+ slave 视角:
-    1. 开启了 `backlog` 时，会将接收到的`master` 端同步的数据缓冲在 `backlog` 中，将接收到数据的最末端byte对应的 `offset` 赋值给 `server.master_repl_offset`(详情见`feedReplicationBacklog`函数）；
++ master 视角：
+    1.开启了 `backlog` 时，会将接收到 `client` 端下发的命令缓冲在 `backlog` 中，将接收到数据的最末端byte对应的 `offset` 赋值给 `server.master_repl_offset`(详情见`feedReplicationBacklog`函数）；
++ slave 视角：
+    1.开启了 `backlog` 时，会将接收到的`master` 端同步的数据缓冲在 `backlog` 中，将接收到数据的最末端byte对应的 `offset` 赋值给 `server.master_repl_offset`(详情见`feedReplicationBacklog`函数）；
     2. 完成 `full resync` 后将 `server.master->reploff` 赋值给 `server.master_repl_offset`(详情见 `readSyncBulkPayload` 函数)；
-    3. 节点可以在重启时使用 [loadDataFromDisk](https://github.com/redis/redis/blob/5.0/src/server.c#L4067)函数从 `RDB` 文件中恢复同步的 `metadata`，对 `master_repl_offset` 进行初始化（将 `repl_offset` 赋值给 `master_repl_offset`）
-    注意: redis节点重启后，replication meta 数据可以从 RDB 文件中恢复，当使用 Aof 格式的日志格式时无法支持此功能。可以使用`SHUT DOWN`命令去关闭节点同时生成一个 RDB 文件，这在节点更新的时候很有用，在重启恢复内存后可以使用部分同步继续更新数据（在条件满足的情况下）。
+    3.节点可以在重启时使用 [loadDataFromDisk](https://github.com/redis/redis/blob/5.0/src/server.c#L4067)函数从 `RDB` 文件中恢复同步的 `metadata`，对 `master_repl_offset` 进行初始化（将 `repl_offset` 赋值给 `master_repl_offset`）
+    注意：redis节点重启后，replication meta 数据可以从 RDB 文件中恢复，当使用 Aof 格式的日志格式时无法支持此功能。可以使用`SHUT DOWN`命令去关闭节点同时生成一个 RDB 文件，这在节点更新的时候很有用，在重启恢复内存后可以使用部分同步继续更新数据（在条件满足的情况下）。
 
 当发生 `failover` 时，提升 `slave` 到 `master` 的过程中 `master_repl_offset` 不会被修改，即`new master` 会延续之前的 `offset` 继续递增。
 
@@ -487,19 +501,20 @@ server.repl_backlog_off:
 
 1. 初始化一个 size 为 10 的`backlog`，如下图所示：
 
-	![backlog_init 图](/assets/images/redis_psync_protocol/backlog_init.svg)
+    ![backlog_init 图](/assets/images/redis_psync_protocol/backlog_init.svg)
 
 2. 向其中写入 5 bytes 数据，如下图所示：
 
-	![backlog_write 图](/assets/images/redis_psync_protocol/backlog_write.svg)
+    ![backlog_write 图](/assets/images/redis_psync_protocol/backlog_write.svg)
 
-	此时`backlog`尚未写满，`backlog_off`不会发生变动。
+    此时`backlog`尚未写满，`backlog_off`不会发生变动。
 
 3. 继续向其中写入 8 bytes 数据，如下图所示：
 
-	![backlog_write1 图](/assets/images/redis_psync_protocol/backlog_write_1.svg)
+    ![backlog_write1 图](/assets/images/redis_psync_protocol/backlog_write_1.svg)
 
 其具体实现如下：
+
 ``` C
 /* Add data to the replication backlog.
  * This function also increments the global replication offset stored at
@@ -554,6 +569,7 @@ void replicationFeedSlavesFromMasterStream(list *slaves, char *buf, size_t bufle
 ```
 
 backlog的创建是通过 [createReplicationBacklog](https://github.com/redis/redis/blob/5.0/src/replication.c#L78) 函数：
+
 ``` C
 void createReplicationBacklog(void) {
     serverAssert(server.repl_backlog == NULL);
@@ -567,6 +583,7 @@ void createReplicationBacklog(void) {
     server.repl_backlog_off = server.master_repl_offset+1;
 }
 ```
+
 其调用的场景如下：
 
 1. `syncCommand`函数：执行 `PSYNC` 命令，当前`backlog ==NULL && listLength(server.slaves) == 1`，则创建 `backlog`：
@@ -586,7 +603,7 @@ void createReplicationBacklog(void) {
         createReplicationBacklog();
     }
     ```
-    
+
 2. `readSyncBulkPayload`函数：执行完全量同步后开启`backlog`：
 
     ``` C
@@ -600,7 +617,9 @@ void createReplicationBacklog(void) {
         ... ...
     }
     ```
+
 3. `slaveTryPartialResynchronization` 函数：尝试执行部分同步，在返回`+CONTINUE` 后初始化 `backlog`：
+
     ``` C
     if (!strncmp(reply,"+CONTINUE",9)) {
         ... ...
@@ -614,6 +633,7 @@ void createReplicationBacklog(void) {
 综上对于 `master` 而言，某些情况可能会不开启 `backlog`；对于 `slave` 而言无论是否有`sub-slaves` 都会开启 `backlog`（在支持PSYNC 协议的前提下）。
 
 `backlog`的释放是通过 [freeReplicationBacklog](https://github.com/redis/redis/blob/5.0/src/replication.c#L117) 函数：
+
 ``` C
 void freeReplicationBacklog(void) {
     serverAssert(listLength(server.slaves) == 0);
@@ -621,6 +641,7 @@ void freeReplicationBacklog(void) {
     server.repl_backlog = NULL;
 }
 ```
+
 其调用场景如下：
 
 1. `replicationCron` 函数：当master没有slave且超过一段时间（**由配置指定，如果为0则不会被释放**）后，会释放`backlog`空间：
@@ -660,6 +681,7 @@ void freeReplicationBacklog(void) {
     ```
 
 2. `syncWithMaster`函数：当 `slave` 执行 PSYNC 失败（由于master不支持，或者校验未通过），需要清理 `backlog`，强制 sub-slaves 执行 resync。
+
     ``` C
         ... ...
         if (psync_result == PSYNC_CONTINUE) {
@@ -676,7 +698,7 @@ void freeReplicationBacklog(void) {
         ... ...
     ```
 
-`backlog` 的size调整是通过[resizeReplicationBacklog]() 函数：
+`backlog` 的size调整是通过 [resizeReplicationBacklog](https://github.com/redis/redis/blob/5.0/src/replication.c#L96) 函数：
 
 ``` C
 /* This function is called when the user modifies the replication backlog
@@ -718,12 +740,12 @@ void resizeReplicationBacklog(long long newsize) {
 
 `backlog` 用于缓存 `client` 下发命令去支持 `PSYNC` 协议；`slave` 也会开启 `backlog`，除了用于服务 `sub-slaves`，还用于切换为主时提供`PSYNC`。
 
-
 ## failover
 
 在这一小节主要专注于`failover`过程中，与 `replications` 相关的操作，failover的触发时机和选举机制会在其他章节中陈述。
 
 当一个 `slave` 切换为 `master` 时会执行 [replicationUnsetMaster](https://github.com/redis/redis/blob/5.0/src/replication.c#L2018) 函数来清理 `old master` 信息并生成自己成为 `new master` 的相关信息：
+
 ``` C
 
 /* 取消replications，设置自己为master. */
@@ -760,6 +782,7 @@ void replicationUnsetMaster(void) {
 ```
 
 综上，在`slave` 提升为 `master` 时执行的步骤如下：
+
 1. 清理 master_host，备份并生成新的 replid；
 2. 释放 master 和 cached master client；
 3. 取消 replication shake；
@@ -767,11 +790,13 @@ void replicationUnsetMaster(void) {
 5. 清理 slaveseldb 状态，更新 slave 不存在的时间为当前时间；
 
 该函数调用的时机如下：
+
 1. clusterFailoverReplaceYourMaster：执行 `cluster failover` 命令，或者执行自动故障转移（slave对应的master处于 FAIL 状态，发起自动故障转移）；
 2. clusterReset：执行 `cluster reset` 命令；
 3. replicaofCommand：执行`replicaof no one` 命令；
 
 当 `master` 切换为 `slave` 时要执行[replicationSetMaster](https://github.com/redis/redis/blob/5.0/src/replication.c#L1993)函数，清理`relications`的状态并利用自身信息创建`cached_master`：
+
 ``` C
 /* Set replication to the specified master address and port. */
 void replicationSetMaster(char *ip, int port) {
@@ -807,6 +832,7 @@ void replicationSetMaster(char *ip, int port) {
 ```
 
 综上 `master` 切换为 `slave` 执行的步骤如下：
+
 1. 保存 new master 的 host 信息
 2. 断开所有处于`CLIENT_BLOCKED`状态的 `client` ， 向它们发送一个`-UNBLOCKED`的错误；
 3. 断开所有的`slaves`，强迫其重新执行同步流程，切换到新的 `replication story`；
@@ -814,19 +840,21 @@ void replicationSetMaster(char *ip, int port) {
 5. 重置当前的 `repl_state` 状态为 `REPL_STATE_CONNECT`；
 
 该函数的调用时机如下：
+
 1. clusterUpdateSlotsConfigWith：更新槽的配置，当一个`master node`没有对应槽去服务时，会被迁移为其他 `master node`的`slave`；当一个 `slave node` 的`master node`没有槽分配时，会被切换到其他的 `slots owner`；
-2. replicaofCommand：`master node`执行`replicaof ip port`命令，迁移为指定节点的`slave`；
+2. replicaofCommand：`master node`执行`slaveof ip port`命令(在 >=redis 5.0 的版本，使用`replicaof`替换；在cluster中不允许执行 `slaveof`和`replicaof`命令)，迁移为指定节点的`slave`；
 
 到此可以回答上面提出的第4个问题：
 
 4. 在发生 failover 后如何继续 psync ？
-    
-    在发生 failover 后一个 `slave node` 会提升为 `master node`(在哨兵模式下由哨兵选择一个`slave node`切换为`master node`，以优先级高的优先，优先级相同的情况下以 offset 高的优先，offset 相同的情况下以节点号小的优先；在集群模式下由同复制集中的`slave nodes`推举一个`slave node`，以 offset 大的优先，再由其他`master nodes` 去认证，在取得大多数 `master nodes` 认证后，完成切换。)，同时记录上一轮的 `replid` 为`replid2` 和 `master_repl_offset+1` 为 `second_replid_offset`（详情见[replicationUnsetMaster]()函数）。
+ 
+    在发生 failover 后一个 `slave node` 会提升为 `master node`(在哨兵模式下由哨兵选择一个`slave node`切换为`master node`，以优先级高的优先，优先级相同的情况下以 offset 高的优先，offset 相同的情况下以节点号小的优先；在集群模式下由同复制集中的`slave nodes`推举一个`slave node`，以 offset 大的优先，再由其他`master nodes` 去认证，在取得大多数 `master nodes` 认证后，完成切换。)，同时记录上一轮的 `replid` 为`replid2` 和 `master_repl_offset+1` 为 `second_replid_offset`（详情见[replicationUnsetMaster](https://github.com/redis/redis/blob/5.0/src/replication.c#L2018)函数）。
     当其他 `slave nodes` 去向 `new master node` 发送`PSYNC cache_master->replid cache_master->reloff+1` 去完成 `handshake` 流程时，可以满足 `server.replid2 == master_replid && psync_offset <=  server.second_replid_offset` 的判断条件。
-
 
 ## 参考文档
 
-[1] 陈雷. Redis 5设计与源码分析, 北京, 机械工业出版社, July 2020 
+[^1]: 陈雷. Redis 5设计与源码分析, 北京, 机械工业出版社, July 2020
 
-[2] Redis Ltd. Replication. Aguest 25 2020, https://redis.io/topics/replication
+[^2]: Redis Ltd. Replication. Aguest 25 2020, https://redis.io/topics/replication
+
+[^3]: Souvik. Redis diskless replication: What, how, why and the caveats. March 8 2020, https://deepsource.io/blog/redis-diskless-replication/
