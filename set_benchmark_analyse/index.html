@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.22.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+--><html lang="zh" class="no-js">
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Set_benchmark_analyse - Newbee</title>
+<meta name="description" content="">
+
+
+  <meta name="author" content="Zhipeng Wang">
+  
+  <meta property="article:author" content="Zhipeng Wang">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:site_name" content="Newbee">
+<meta property="og:title" content="Set_benchmark_analyse">
+<meta property="og:url" content="http://localhost:4000/set_benchmark_analyse/">
+
+
+  <meta property="og:description" content="">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2022-05-10T00:00:00+08:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="http://localhost:4000/set_benchmark_analyse/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "ZhipengWang",
+      "url": "http://localhost:4000/"
+    
+  }
+</script>
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Newbee Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single wide">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          Newbee
+          <span class="site-subtitle">sharing knowledge</span>
+        </a>
+        <ul class="visible-links"></ul>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/assets/icons/bee.svg" alt="Zhipeng Wang" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Zhipeng Wang</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>Software Engineer.</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name">SZ, CN.</span>
+        </li>
+      
+
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:wangzhipenghyc@163.com">
+            <meta itemprop="email" content="wangzhipenghyc@163.com">
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Set_benchmark_analyse">
+    <meta itemprop="description" content="">
+    <meta itemprop="datePublished" content="2022-05-10T00:00:00+08:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Set_benchmark_analyse
+</h1>
+          
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          12 minute read
+        
+      </span>
+    
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title">
+<i class="fas fa-file-alt"></i> On this page</h4></header>
+              <ul class="toc__menu"><li>
+<a href="#%E8%AE%B0%E4%B8%80%E6%AC%A1%E6%B5%8B%E8%AF%95%E5%88%86%E6%9E%90%E5%BC%80%E5%90%AF-pipeline-%E6%97%B6-slave-%E5%AF%B9-set-%E8%80%97%E6%97%B6%E5%BD%B1%E5%93%8D">记一次测试分析(开启 pipeline 时 slave 对 SET 耗时影响)</a><ul>
+<li><a href="#%E8%83%8C%E6%99%AF%E4%BB%8B%E7%BB%8D">背景介绍</a></li>
+<li>
+<a href="#%E6%A0%B9%E5%9B%A0%E5%88%86%E6%9E%90">根因分析</a><ul>
+<li><a href="#on-cpu-%E5%88%86%E6%9E%90">on-cpu 分析</a></li>
+<li><a href="#off-cpu-%E5%88%86%E6%9E%90">off-cpu 分析</a></li>
+<li><a href="#function-trace">function trace</a></li>
+<li><a href="#%E7%BB%93%E8%AE%BA">结论</a></li>
+</ul>
+</li>
+<li>
+<a href="#%E5%BB%B6%E4%BC%B8%E9%98%85%E8%AF%BB">延伸阅读</a><ul>
+<li><a href="#redis-%E7%9A%84%E6%B6%88%E6%81%AF%E6%8E%A5%E6%94%B6%E4%B8%8E%E5%8F%91%E9%80%81">redis 的消息接收与发送</a></li>
+<li><a href="#redis-%E5%91%BD%E4%BB%A4%E7%9A%84%E8%80%97%E6%97%B6%E7%BB%9F%E8%AE%A1">redis 命令的耗时统计</a></li>
+<li><a href="#perf-sched">perf sched</a></li>
+<li><a href="#stap-%E4%BD%BF%E7%94%A8">stap 使用</a></li>
+</ul>
+</li>
+<li><a href="#%E5%8F%82%E8%80%83%E5%BC%95%E7%94%A8">参考引用</a></li>
+</ul>
+</li></ul>
+
+            </nav>
+          </aside>
+        
+        <style>
+    p { font: 0.875rem YaHei !important; }
+</style>
+
+<h1 id="记一次测试分析开启-pipeline-时-slave-对-set-耗时影响">记一次测试分析(开启 pipeline 时 slave 对 SET 耗时影响)</h1>
+
+<h2 id="背景介绍">背景介绍</h2>
+
+<p>在工作过程中，测试同事反馈在如下 case 中 redis 的 <code class="language-plaintext highlighter-rouge">get</code> 指令性能要明显优于 <code class="language-plaintext highlighter-rouge">set</code> 指令性能：</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    redis-benchmark <span class="nt">-h</span> <span class="nv">$IP</span> <span class="nt">-p</span> <span class="nv">$PORT</span> <span class="nt">-a</span> <span class="nv">$PASSWD</span> <span class="nt">-r</span> 4000000 <span class="nt">-n</span> 5000000 <span class="nt">-t</span> <span class="nb">set</span>,get <span class="nt">-d</span> 500 <span class="nt">-c</span> 500 <span class="nt">-P</span> 16
+    ......
+    78143.31 requests per second // <span class="nb">set</span>
+    ......
+    175389.38 requests per second // get
+</code></pre></div></div>
+
+<p>在不指定 “-P” 时 <code class="language-plaintext highlighter-rouge">get</code> 的性能也要优于 <code class="language-plaintext highlighter-rouge">set</code>，但并不是如此明显：</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    redis-benchmark <span class="nt">-h</span> <span class="nv">$IP</span> <span class="nt">-p</span> <span class="nv">$PORT</span> <span class="nt">-a</span> <span class="nv">$PASSWD</span> <span class="nt">-r</span> 4000000 <span class="nt">-n</span> 5000000 <span class="nt">-t</span> <span class="nb">set</span>,get <span class="nt">-d</span> 500 <span class="nt">-c</span> 500 
+    ... ...
+    43798.95 requests per second // <span class="nb">set</span>
+    ... ...
+    63569.56 requests per second // get
+</code></pre></div></div>
+
+<p>下面进行简要分析，client 发送给 redis 的一次请求可以拆分为以下几个阶段：</p>
+
+<ol>
+  <li>T1: client 发送命令阶段；</li>
+  <li>T2: 物理层网络报文传输延迟；</li>
+  <li>T3: redis server 接收命令阶段；</li>
+  <li>
+<strong>T4</strong>: redis server 处理命令阶段；</li>
+  <li>T5: redis server 发送 reply 阶段；</li>
+  <li>T6: 物理层网络报文传输延迟；</li>
+  <li>T7: client 接收 reply 阶段；</li>
+</ol>
+
+<p>tps 的计算公式如下：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    T = T1 + T2 + T3 + T4 + T5 + T6 + T7
+    tps = requests/T
+</code></pre></div></div>
+
+<p>在并发客户端数量相同的情况下，指定 <code class="language-plaintext highlighter-rouge">-P 16</code> 的影响如下：</p>
+
+<ol>
+  <li>
+    <p>减少 syscall 的调用数量: 在 redis server 内部实现中调用 <a href="https://github.com/redis/redis/blob/5.0/src/networking.c#L979">writeToClient</a> 去向对端发送数据，会一次性将缓存区内所有数据调用 <code class="language-plaintext highlighter-rouge">write(2)</code> 函数写入 <code class="language-plaintext highlighter-rouge">socket</code>，在 server 内存充足（没有超过最大内存限制 或 未限制最大内存）的情况下，当发送超过 64 KB 数据后会停止发送（如果客户端是 slave则忽略此限制）；在 redis-benchmark 中也是一次性将调用<code class="language-plaintext highlighter-rouge">write(2)</code>函数写入所有数据，具体的处理过程见<strong>延伸阅读</strong>部分；</p>
+  </li>
+  <li>
+    <p>提升网络利用率: redis server 与 redis-benchmark 中都关闭了 socket 的 <code class="language-plaintext highlighter-rouge">Nagle</code> 算法，对小包的传输性能会提升，但是会降低网络利用率。pipeline 将多个命令“合并”发送，可以大幅减少报文数量，减少应答次数，提高网络利用率；</p>
+  </li>
+</ol>
+
+<p>但以上两点影响的是 T1、T3、T5、T7 阶段，T2与T6阶段为物理环境所决定，redis-benchmark 宿主机与 proxy 宿主机、数据库宿主机属于同一网段，网络延迟较低：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    # redis-benchmark 主机发起 ping
+    ping -c 100 $proxy_host
+    ... ...
+    rtt min/avg/max/mdev = 0.058/0.092/0.172/0.035
+
+    ping -c 100 $db_host
+    ... ...
+    rtt min/avg/max/mdev = 0.057/0.089/0.178/0.022
+</code></pre></div></div>
+
+<p>对于 <strong>T4 阶段</strong>(<code class="language-plaintext highlighter-rouge">redis server</code> 执行 <code class="language-plaintext highlighter-rouge">set</code> 和 <code class="language-plaintext highlighter-rouge">get</code> 命令的耗时)并不会因此而减少，因为总的请求数量不变。通过 redis server 内部的 statistics 信息，可以查看 <code class="language-plaintext highlighter-rouge">set</code> 与 <code class="language-plaintext highlighter-rouge">get</code> 命令执行的耗时差距：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    &gt; INFO commandstats
+    cmdstat_set:calls=425583765,usec=1029939666,usec_per_call=2.42
+    cmdstat_get:calls=438697614,usec=840824546,usec_per_call=1.92
+</code></pre></div></div>
+
+<p>可以看出 <code class="language-plaintext highlighter-rouge">get</code> 命令在执行时要明显优于 <code class="language-plaintext highlighter-rouge">set</code> 命令，但仍未达到测试结果的差距，比较接近不加 <code class="language-plaintext highlighter-rouge">-P</code> 时的性能差距：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    # 非 -P 情况
+    set_tps/ get_tps = 43798.95/63569.56 = 0.689
+    get_usec_per_call/set_usec_per_call= 1.92/2.42 = 0.79
+
+    # -P 情况
+    set_pipeline_tps/get_pipeline_tps = 78143.31/175389.38 = 0.446
+</code></pre></div></div>
+
+<p>通过上述的对比，明显可以发现在<strong>T4 阶段</strong>：除去执行命令本身， <code class="language-plaintext highlighter-rouge">get</code> 命令 case 其他过程要优于 <code class="language-plaintext highlighter-rouge">set</code> 命令 case。查看 redis server 的源代码可以发现，<strong>在执行 <code class="language-plaintext highlighter-rouge">set</code> 命令时或其他会修改 <code class="language-plaintext highlighter-rouge">data set</code> 的命令时，需要将变化传递给 <code class="language-plaintext highlighter-rouge">slave</code> 和 <code class="language-plaintext highlighter-rouge">aof</code><sup id="fnref:1" role="doc-noteref"><a href="#fn:1" class="footnote" rel="footnote">1</a></sup>，因此在执行过程中会拖慢 <code class="language-plaintext highlighter-rouge">processCommand</code> 的速度</strong>。</p>
+
+<p>为此进行了如下测试，对比在 <code class="language-plaintext highlighter-rouge">pipeline</code> 和 <code class="language-plaintext highlighter-rouge">slave</code> 两个影响因素下的 tps，结果如下：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    # 不开启 slave 时
+    # 开启 pipeline
+    get: 177405.62 request/s
+    set: 118846.71 request/s
+
+    # 不开启 pipeline
+    get: 61101.54 request/s
+    set: 46511.63 request/s
+
+    # 开启 salve 时
+    # 开启 pipeline
+    get: 170520.42 request/s
+    set: 81866.55 request/s
+
+    # 不开启 pipeline
+    get: 61282.02 request/s
+    set: 42770.14 request/s
+
+    # 测试指令
+    pipeline: redis-benchmark -h $IP -p $PORT -a $PASSWD -r 4000000 -n 5000000 -t set,get -d 500 -c 500 -P 16
+    no pipeline: redis-benchmark -h $IP -p $PORT -a $PASSWD -r 4000000 -n 5000000 -t set,get -d 500 -c 500
+</code></pre></div></div>
+
+<p>在不开启 slave 的场景（以下简称 no-slave）下：</p>
+
+<ul>
+  <li>开启 pipeline 时的读写效率比 <code class="language-plaintext highlighter-rouge">set_rps/get_rps=0.67</code>；</li>
+  <li>不开启 pipeline 时的读写效率比 <code class="language-plaintext highlighter-rouge">set_rps/get_rps=0.76</code>；</li>
+</ul>
+
+<p>在开启 slave 的场景（以下简称 has-slave）下：</p>
+
+<ul>
+  <li>开启 pipeline 时的读写效率比 <code class="language-plaintext highlighter-rouge">set_rps/get_rps=0.48</code>；</li>
+  <li>不开启 pipeline 时的读写效率比 <code class="language-plaintext highlighter-rouge">set_rps/get_rps=0.69</code>；</li>
+</ul>
+
+<p>可以清楚的发现在 no-slave 场景，是否开启 pipeline 对读写效率比无较大影响，在<em>has-slave 场景下，pipeline 对读写效率比影响较大</em>。对 set 命令 tps 进行横向对比可以发现：<strong>在开启 pipeline 场景下，has-slave 时的 tps 较 no-slave 时下降 30.11%</strong>，这是造成读写效率比下降的最重要原因。</p>
+
+<h2 id="根因分析">根因分析</h2>
+
+<p>整个执行期间的时间开销可以分为两部分：on-cpu 和 off-cpu，其中：</p>
+
+<ul>
+  <li>on-cpu 部分：cpu 执行服务进程处理 command 的耗时，包括内核态、用户态；</li>
+  <li>off-cpu 部分：可以大致分两部分：1、主动触发：syscall 或 锁操作等 导致的 block、io-wait 的时间开销；2、被动触发：系统多任务抢占(例如：时间片耗尽)导致换入、换出 cpu 的延时开销，此外在多核 cpu 的环境下有可能发生 task migrate；</li>
+</ul>
+
+<p>向 <code class="language-plaintext highlighter-rouge">slave</code> 发送数据在 <code class="language-plaintext highlighter-rouge">beforeSleep</code> 和 <code class="language-plaintext highlighter-rouge">eventLoop</code> 阶段完成，向 <code class="language-plaintext highlighter-rouge">aof</code> 刷写数据都是在 <code class="language-plaintext highlighter-rouge">beforeSleep</code> 或 <code class="language-plaintext highlighter-rouge">serverCron</code> 阶段中完成。在整个 <code class="language-plaintext highlighter-rouge">processCommand</code> 过程中除申请内存外无其他 syscall 调用，线上环境的 redis server 使用 <code class="language-plaintext highlighter-rouge">jemalloc</code> 进行管理内存。</p>
+
+<h3 id="on-cpu-分析">on-cpu 分析</h3>
+
+<p>redis server 的单事件处理线程模式大大方便了 profile 分析，此处使用 <code class="language-plaintext highlighter-rouge">perf</code> 工具进行 cpu profile 收集和分析。
+has-slave 的结果如下(tps 73606.27)：</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c">## 此处指定 -t 标识只采集 thread id，避免 redis server 中其他线程的干扰。</span>
+    perf record <span class="nt">--call-graph</span> dwarf <span class="nt">-t</span> <span class="nv">$redis_server_pid</span> <span class="nt">--</span> <span class="nb">sleep </span>10
+    Samples: 38K of event <span class="s1">'cycles'</span>, Event count<span class="o">(</span>approx.<span class="o">)</span>: 17854460442
+    Children Self  Command       Shared Object Symbol
+    - 82.65% 0.00% redis-server  redis-server  <span class="o">[</span>.] aeMain
+     - aeMain
+        - 80.60% aeProcessEvents
+           - 78.69% processInputBuffer
+              - 64.70% processCommand
+                 - 62.82% call
+                    - 24.54% replicationFeedSlaves
+                       + 11.40% addReplyBulk
+                       + 6.66% addReply
+                       + 2.41% feeaReplicationBacklog
+                       + 1.82% feedReplicationBacklogWithObject
+                         0.50% stringObjectLen
+                    + 21.86% setCommand
+                    + 16.05% propagate
+                 + 1.04% dictFetchValue
+              + 12.53% processMultibulkBuffer
+              + 1.09% resetClient
+           + 1.15% writeToClient
+             0.53% readQueryFromClient 
+        + 2.04% beforeSleep
+</code></pre></div></div>
+
+<p>no-slave 的结果如下(tps 102724.5)：</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    perf record <span class="nt">--call-graph</span> dwarf <span class="nt">-t</span> <span class="nv">$redis_server_pid</span> <span class="nt">--</span> <span class="nb">sleep </span>10
+    Samples: 39K of event <span class="s1">'cycles'</span>, Event count<span class="o">(</span>approx.<span class="o">)</span>: 18063039903
+    Children Self  Command       Shared Object Symbol
+    - 77.02% 0.00% redis-server  redis-server  <span class="o">[</span>.] aeMain
+     - aeMain
+        - 74.59% aeProcessEvents
+           - 73.47% processInputBuffer
+              - 56.40% processCommand
+                 - 53.75% call
+                    + 30.44% setCommand
+                    + 22.84% propagate
+                 + 1.51% dictFetchValue
+              + 15.01% processMultibulkBuffer
+              + 1.57% resetClient
+             0.89% readQueryFromClient
+        + 2.43% beforeSleep 
+</code></pre></div></div>
+
+<p>采集时间都为 10s，可以明显的看出在 has-slave 的场景下： 新增 replicationFeedSlaves 函数的 cpu 占比 24.54%，主要是在 addReply 和 addReplyBulk 函数，将数据添加到 slave client 的 output buffer 中。这里需要说明的是，perf 在统计中将 replicationFeedSlaves 与 propagate 放在同一层级是与实际源码不符的，实际源码情况 replicationFeedSlaves 是由 progate 函数调用的。</p>
+
+<p>假设执行 <code class="language-plaintext highlighter-rouge">N</code> 个命令的 cpu 时间开销是不变的 <code class="language-plaintext highlighter-rouge">T</code>，在 has-slave 的情况下时间开销变为 <code class="language-plaintext highlighter-rouge">(1/0.755)T = 1.325T</code>，即 tps 下降率为 <code class="language-plaintext highlighter-rouge">24.5%</code>，而这与实际测试值得下降 <code class="language-plaintext highlighter-rouge">28.3%</code>仍有一些差距。说明在 has-slave 场景下仍有一些额外的开销，其中一个因素为<em>发送数据到 slave 的开销</em>。</p>
+
+<p>这也可以从 <code class="language-plaintext highlighter-rouge">perf report</code> 的记录中观察出来：</p>
+
+<p>在 has-slave 场景中：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    - 16.53% system_call_fastpath
+       - 11.25% sys_write
+        - 11.10% vfs_write
+          - 10.88% do_sync_write
+            + 7.17% sock_aio_write
+            + 3.67% xfs_file_aio_write # 向 aof 日志写数据
+       + 4.86% sys_read
+</code></pre></div></div>
+
+<p>在 no-slave 场景中：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    - 21.83% system_call_fastpath
+       + 13.91% sys_write
+       + 7.31% sys_read
+       + 0.59% sys_epoll_wait
+</code></pre></div></div>
+
+<p>has-slave 的 w/r cpu 比例要高于 no-slave 场景，此处无法判断出有多少 cpu 开销是由于向 slave 同步数据造成的。</p>
+
+<p>综上可以得出<strong>结论1</strong>：在 has-slave 场景下<strong>replicationFeedSlaves 是主要的新增 cpu 开销</strong>（占比 24.5%），此外还有向 slave 发送数据带来的 cpu 开销（占比较少）。</p>
+
+<h3 id="off-cpu-分析">off-cpu 分析</h3>
+
+<p>perf 中用于分析 off-cpu 的命令为 <code class="language-plaintext highlighter-rouge">perf sched</code>，使用 <code class="language-plaintext highlighter-rouge">perf sched record</code> 记录进程的调度信息，然后使用 <code class="language-plaintext highlighter-rouge">perf sched timehist</code> 去进行统计分析<sup id="fnref:3" role="doc-noteref"><a href="#fn:3" class="footnote" rel="footnote">2</a></sup>，对输出项的详细说明见<a href="#%E5%BB%B6%E4%BC%B8%E9%98%85%E8%AF%BB">延伸阅读</a>部分</p>
+
+<p>has-slave 的结果如下：</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    perf sched record <span class="nt">-o</span> redis_set_sched.data <span class="nt">--</span> <span class="nb">sleep </span>10
+
+    <span class="c"># 统计 run time</span>
+    perf sched timehist <span class="nt">-i</span> redis_set_sched.data | <span class="nb">grep</span> <span class="s2">"</span><span class="se">\[</span><span class="nv">$pid</span><span class="se">\]</span><span class="s2">"</span> | <span class="nb">awk</span> <span class="s1">'{sum += $6}END{print sum}'</span>
+    9752.96
+
+    <span class="c"># 统计 wait time</span>
+    perf sched timehist <span class="nt">-i</span> redis_set_sched.data | <span class="nb">grep</span> <span class="s2">"</span><span class="se">\[</span><span class="nv">$pid</span><span class="se">\]</span><span class="s2">"</span> | <span class="nb">awk</span> <span class="s1">'{sum += $4}END{print sum}'</span>
+    14.903
+
+    <span class="c"># 统计 sch delay</span>
+    perf sched timehist <span class="nt">-i</span> redis_set_sched.data | <span class="nb">grep</span> <span class="s2">"</span><span class="se">\[</span><span class="nv">$pid</span><span class="se">\]</span><span class="s2">"</span> | <span class="nb">awk</span> <span class="s1">'{sum += $5}END{print sum}'</span>
+    0
+</code></pre></div></div>
+
+<p>no-slave 的结果如下：</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   perf sched record <span class="nt">-o</span> redis_set_no_slave_sched.data <span class="nt">--</span> <span class="nb">sleep </span>10
+
+   <span class="c"># 统计 run time</span>
+   perf sched timehist <span class="nt">-i</span> redis_set_no_slave_sched.data | <span class="nb">grep</span> <span class="s2">"</span><span class="se">\[</span><span class="nv">$pid</span><span class="se">\]</span><span class="s2">"</span> | <span class="nb">awk</span> <span class="s1">'{sum += $6}END{print sum}'</span> 
+   9797.26
+
+   <span class="c"># 统计 wait time</span>
+   perf sched timehist <span class="nt">-i</span> redis_set_no_slave_sched.data | <span class="nb">grep</span> <span class="s2">"</span><span class="se">\[</span><span class="nv">$pid</span><span class="se">\]</span><span class="s2">"</span> | <span class="nb">awk</span> <span class="s1">'{sum += $4}END{print sum}'</span> 
+   14.546
+
+   <span class="c"># 统计 sch delay</span>
+   perf sched timehist <span class="nt">-i</span> redis_set_sched.data | <span class="nb">grep</span> <span class="s2">"</span><span class="se">\[</span><span class="nv">$pid</span><span class="se">\]</span><span class="s2">"</span> | <span class="nb">awk</span> <span class="s1">'{sum += $5}END{print sum}'</span>
+   0 
+</code></pre></div></div>
+
+<p>总计抓取的时间为 10s，has-slave 与 no-slave 统计出来 <code class="language-plaintext highlighter-rouge">run time</code> 的时间基本相等，且<code class="language-plaintext highlighter-rouge">wait time</code> 时间极短，说明进程 <code class="language-plaintext highlighter-rouge">off-cpu</code> 的时间占比很低。</p>
+
+<p>需要说明的是使用 <code class="language-plaintext highlighter-rouge">perf sched record</code> 去记录时最好不要指定 pid，直接抓取全局的调度记录，这样才能准确的分析调度的状况。 perf 是基于采样的，难以抓取到所有的 sched 事件，统计结果会存在一定误差。</p>
+
+<p>综上可以得出<strong>结论2</strong>：在 has-slave 和 no-slave 场景下，<strong>off-cpu的时间占比很低</strong>（has-slave 下 off-cpu占比 0.15 %，on-slave 下 off-cpu 占比 0.14%），两者基本相同。</p>
+
+<p>统计结果并未像作者预先设想那样，会由于大量的 network io 交互导致很高的 off-cpu 占比。大部分换出 cpu 是因为多任务争用(retint_careful、sysret_careful)，少部分是因为 network(inet_sendmsg)、file io 读写(xfs_file_aio_write)导致，以及缺页中断(page_fault)和内存分配(sk_stream_alloc_skb)。</p>
+
+<h3 id="function-trace">function trace</h3>
+
+<p>上面通过 perf profile 和 perf sched 针对 on-cpu 和 off-cpu 两方面进行了分析。而真正的每个 function 的耗时统计，以及读写 slave 带来的时间开销统计，则需要 function trace 来完成。</p>
+
+<p>systemtap 是一款内核调试的利器，详情请参见<a href="#%E5%BB%B6%E4%BC%B8%E9%98%85%E8%AF%BB">延伸阅读</a>，可以通过它抓取 slave 与 master 建立的 socket fd，统计所有 rw 操作耗时。抓取 slave-master 的 socket fd 的脚本如下：</p>
+
+<pre><code class="language-stap">#!/usr/bin/env stap
+fuction addr_parse : string (fd : long) % {
+    struct sockaddr_storage stPeer;
+    char buff[128];
+    struct sockaddr* sin4 = NULL;
+    int err = 0;
+    int addrLen = 0;
+    struct socket* sock = NULL;
+
+    sock = sockfd_lookup((int)STAP_ARG_fd, &amp;err);
+    if (err != 0){
+        sprintf(buff, "lookup [%d] failure: %x", (int)STAP_ARG_fd, err);
+    }else{
+        err = kernel_getpeername(sock, (struct sockaddr *)&amp;stPeer, &amp;addrLen); 
+        if (err &lt; 0) {
+            sprintf(buff, "getpeername [%d] failure: %x", (int)STAP_ARG_fd, err);
+        } else {
+            sin4 = (struct sockaddr *)&amp;stPeer;
+            switch(sin4-&gt;sa_family){
+            case AF_INET6:
+                        sprintf(buff, "%pISpc", sin4);
+                break;
+            case AF_INET:
+                        sprintf(buff, "%pISpc", sin4);
+                break;
+            }
+        }
+    }
+
+    strlcat (STAP_RETVALUE, buff, MAXSTRINGLEN);
+%}
+
+probe syscall.accept*.return {
+    if(pid()==target() &amp;&amp; retval &gt; 0){
+        printf("accept %d: %s\n", retval, addr_parse(retval))
+    }
+}
+</code></pre>
+
+<p>统计 slave 相关操作耗时的脚本如下：</p>
+
+<pre><code class="language-stap">#!/usr/bin/env stap
+global process_event, before_sleep, call, slave_feed, slave_rw, all_rw, start
+global ss = $slave_fd
+
+probe process($redis_exec_path).function("call").return {
+    if (pid()==target()) {
+        delay = gettimeofday_us() - @entry(gettimeofday_us())
+        call += delay
+    }
+}
+
+probe process($redis_exec_path).function("replicationFeedSlaves").return {
+    if (pid()==target()) {
+        delay = gettimeofday_us() - @entry(gettimeofday_us())
+        slave_feed += delay
+    }
+}
+
+probe process($redis_exec_path).function("beforeSleep").return {
+    if (pid()==target()) {
+        delay = gettimeofday_us() - @entry(gettimeofday_us())
+        before_sleep += delay
+    }
+}
+
+probe process($redis_exec_path).function("aeProcessEvents").return {
+    if (pid()==target()) {
+        delay = gettimeofday_us() - @entry(gettimeofday_us())
+        process_event += delay
+    }
+}
+
+probe syscall.read.return {
+   if (pid()==target()) {
+        delay = gettimeofday_us() - @entry(gettimeofday_us())
+        if(@entry($fd)==ss){
+            slave_rw += delay
+        }
+        all_rw += delay
+   } 
+}
+
+probe syscall.write.return {
+   if (pid()==target()) {
+        delay = gettimeofday_us() - @entry(gettimeofday_us())
+        if(@entry($fd)==ss){
+            slave_rw += delay
+        }
+        all_rw += delay
+   } 
+}
+
+probe begin{
+    start = gettimeofday_us() 
+}
+
+probe end{
+    dur = gettimeofday_us() - start
+    printf("total: %d, processEvent %d, before %d, call %d, slave_feed %d, all_rw %d, slave_rw %d\n", dur, process_event, before_sleep, call, slave_feed, all_rw, slave_rw); 
+}
+</code></pre>
+
+<p>将 <code class="language-plaintext highlighter-rouge">$slave_fd</code> 和 <code class="language-plaintext highlighter-rouge">$redis_exec_path</code> 替换为实际值，运行统计的结果如下：</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    total: 10254152, processEvent 9407135, before 494402, call 6638171, slave_feed 2600933,  all_rw 933086, slave_rw 118100
+</code></pre></div></div>
+
+<p>其中 <code class="language-plaintext highlighter-rouge">processEvent+before = job_time = 9901537 us</code> 相当于整个实例处理命令的耗时，而且这里面包括 on-cpu 和 off-cpu 两个部分，<code class="language-plaintext highlighter-rouge">slave_feed/job_time = 26.26%</code> 与 上文中 <code class="language-plaintext highlighter-rouge">cpu 24.5%</code> 占比接近，<code class="language-plaintext highlighter-rouge">all_rw</code> 用于统计所有 sycall.write 和 syscall.read 的耗时，<code class="language-plaintext highlighter-rouge">all_rw/job_time = 9.4%</code> 与上文中的 cpu 采样 <code class="language-plaintext highlighter-rouge">16.53%</code> 有较大出入（这可能是由于 systemtap 引入的延迟导致，call 函数调用的次数高于 syscall，引入的延迟多于 syscall）。</p>
+
+<p>slave_rw 是用于统计 slave 交互导致的耗时，<code class="language-plaintext highlighter-rouge">slave_rw/all_rw = 12.66% slave_rw/job_time = %1.19</code>， 按照比例推算，在 has-slave 场景中 slave 网络交互引入的 cpu 消耗为 <code class="language-plaintext highlighter-rouge">16.53%*12.66% = 2.06%</code>，slave 总计引入的 cpu 消耗为 <code class="language-plaintext highlighter-rouge">26.56%</code>，与上述测试的 tps 下降比例基本吻合。</p>
+
+<h3 id="结论">结论</h3>
+
+<p>结合1、2 两个结论，最终可以汇总如下：</p>
+
+<ol>
+  <li>
+    <p>在开启 pipeline 情况下，has-slave 相比 no-slave 下降的根因为向 slave 同步数据；</p>
+  </li>
+  <li>
+    <p>slave 数据同步大部由于向 slave 的发送缓冲区复制 set 命令（占 cpu 消耗 24.5%），少部分是由于 slave 网络交互（占 cpu 消耗 2.06% 推测值）。</p>
+  </li>
+  <li>
+    <p>在本文 benchmark 的过程测试中，redis server 无论是否开启 slave，其大部分时间是 on-cpu 的，只有小部分时间是 off-cpu(0.14%~0.15%)，且 off-cpu 多因为系统多任务任务抢占。</p>
+  </li>
+</ol>
+
+<p>由于 systemtap 的安装和入门有些门槛，可以通过 <code class="language-plaintext highlighter-rouge">perf trace</code> 进行 syscall 的耗时统计。
+开启 slave 结果如下：</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    perf tarce <span class="nt">-s</span> <span class="nt">-p</span> <span class="nv">$redis_server_pid</span> <span class="nt">--</span> <span class="nb">sleep </span>10
+
+    redis-server <span class="o">(</span>289648<span class="o">)</span>, 275228 events, 100.0%
+    syscall       calls   total       min     avg      max   stddev
+                          <span class="o">(</span>msec<span class="o">)</span>    <span class="o">(</span>msec<span class="o">)</span>   <span class="o">(</span>msec<span class="o">)</span>  <span class="o">(</span>msec<span class="o">)</span>  <span class="o">(</span>msec<span class="o">)</span>
+    <span class="nt">------------</span> <span class="nt">------</span> <span class="nt">---------</span> <span class="nt">---------</span> <span class="nt">------</span>  <span class="nt">------</span>  <span class="nt">------</span>
+    write         82497  1180.648    0.002   0.014   2.726   2.36%
+    <span class="nb">read          </span>54612   626.546    0.002   0.011   0.138   0.16%
+    epoll_wait      156    41.277    0.208   0.265   0.375   0.86%
+    ... ...
+</code></pre></div></div>
+
+<p>不开启 slave 结果如下：</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    perf tarce <span class="nt">-s</span> <span class="nt">-p</span> <span class="nv">$redis_server_pid</span> <span class="nt">--</span> <span class="nb">sleep </span>10
+
+    redis-server <span class="o">(</span>289648<span class="o">)</span>, 303806 events, 100.0%
+    syscall       calls   total       min     avg      max   stddev
+                          <span class="o">(</span>msec<span class="o">)</span>    <span class="o">(</span>msec<span class="o">)</span>   <span class="o">(</span>msec<span class="o">)</span>  <span class="o">(</span>msec<span class="o">)</span>  <span class="o">(</span>msec<span class="o">)</span>
+    <span class="nt">------------</span> <span class="nt">------</span> <span class="nt">---------</span> <span class="nt">---------</span> <span class="nt">------</span>  <span class="nt">------</span>  <span class="nt">------</span>
+    write         75673  1323.961    0.007   0.017   2.681   2.27%
+    <span class="nb">read          </span>75644   886.095    0.002   0.012   0.299   0.17%
+    epoll_wait      237    48.619    0.158   0.205   0.519   1.09%
+    ... ...
+</code></pre></div></div>
+
+<p>可以明显看出开启 slave 之后，read 调用次数降低了 27.8%，write 调用次数上涨了 9.0%，read 下降的幅度接近于 tps 的降幅。</p>
+
+<h2 id="延伸阅读">延伸阅读</h2>
+
+<h3 id="redis-的消息接收与发送">redis 的消息接收与发送</h3>
+
+<p><code class="language-plaintext highlighter-rouge">redis-benchmark</code> 和 <code class="language-plaintext highlighter-rouge">redis server</code>中的消息处理体系，其读写过程如下：</p>
+
+<ul>
+  <li>receive:  内核从 NIC 中接收到消息，触发了 <code class="language-plaintext highlighter-rouge">readable</code> 事件，server 响应 <code class="language-plaintext highlighter-rouge">readable</code> 事件，调用 <code class="language-plaintext highlighter-rouge">read(2)</code>函数，将数据从内核空间复制到用户空间；</li>
+  <li>send: 调用 <code class="language-plaintext highlighter-rouge">write(2)</code> 函数发送消息，将数据从用户空间复制到内核空间，然后再传递到 NIC 进行发送。如果一次未完全发送，则为 <code class="language-plaintext highlighter-rouge">socket</code> 绑定 <code class="language-plaintext highlighter-rouge">writeHandle</code> 去响应 <code class="language-plaintext highlighter-rouge">writeable</code> 事件，继续发送剩余数据；</li>
+</ul>
+
+<p>ps: redis 在 linux 中使用 <code class="language-plaintext highlighter-rouge">epoll(7)</code> 函数实现事件服务模型，其使用的事件类型为 <code class="language-plaintext highlighter-rouge">边沿触发</code>(edge-triggered) <sup id="fnref:2" role="doc-noteref"><a href="#fn:2" class="footnote" rel="footnote">3</a></sup>。</p>
+
+<p>在调用 <a href="">createClient</a> 创建 client 时，为 socket 设置了 <code class="language-plaintext highlighter-rouge">O_NONBLOCK</code> 和 <code class="language-plaintext highlighter-rouge">TCP_NODELAY</code> 两个 flag，即 socket 为非阻塞且关闭 <em>Nagle</em> 算法（主要优化small packet 的处理，提高网络利用率）提高请求的响应速度。</p>
+
+<h3 id="redis-命令的耗时统计">redis 命令的耗时统计</h3>
+
+<p>redis 的命令耗时统计继承了它一贯简单易懂的风格，它为每一种 <code class="language-plaintext highlighter-rouge">command</code> 创建了一个全局对象，同种 <code class="language-plaintext highlighter-rouge">command</code> 请求都会复用这个全局对象，在 <code class="language-plaintext highlighter-rouge">command</code> 结构体内有 <code class="language-plaintext highlighter-rouge">microseconds</code> 和 <code class="language-plaintext highlighter-rouge">calls</code> 两个字段用于耗时统计：</p>
+
+<pre><code class="language-C">    struct redisCommand {
+        char *name;
+        redisCommandProc *proc;
+        int arity;
+        char *sflags; /* Flags as string representation, one char per flag. */
+        int flags;    /* The actual flags, obtained from the 'sflags' field. */
+        /* Use a function to determine keys arguments in a command line.
+        * Used for Redis Cluster redirect. */
+        redisGetKeysProc *getkeys_proc;
+        /* What keys should be loaded in background when calling this command? */
+        int firstkey; /* The first argument that's a key (0 = no keys) */
+        int lastkey;  /* The last argument that's a key */
+        int keystep;  /* The step between first and last key */
+        /* 用于耗时统计的字段
+           microseconds 记录执行该命令的总耗时 
+           calls 记录该命令的总调用次数 
+        */
+        long long microseconds, calls; 
+    };
+
+    /* If this function gets called we already read a whole
+    * command, arguments are in the client argv/argc fields.
+    * processCommand() execute the command or prepare the
+    * server for a bulk read from the client.
+    *
+    * If C_OK is returned the client is still alive and valid and
+    * other operations can be performed by the caller. Otherwise
+    * if C_ERR is returned the client was destroyed (i.e. after QUIT). */
+    int processCommand(client *c) {
+        /* Now lookup the command and check ASAP about trivial error conditions
+        * such as wrong arity, bad command name and so forth. */
+        // 从command列表中找到要执行的command，
+        // 同时赋值给 c-&gt;cmd 和 c-&gt;lastcmd.
+        // lookupCommand 函数会返回待执行命令对应的全局对象 
+        c-&gt;cmd = c-&gt;lastcmd = lookupCommand(c-&gt;argv[0]-&gt;ptr);
+
+        /* Exec the command */
+        if (c-&gt;flags &amp; CLIENT_MULTI &amp;&amp;
+            c-&gt;cmd-&gt;proc != execCommand &amp;&amp; c-&gt;cmd-&gt;proc != discardCommand &amp;&amp;
+            c-&gt;cmd-&gt;proc != multiCommand &amp;&amp; c-&gt;cmd-&gt;proc != watchCommand)
+        {
+            queueMultiCommand(c);
+            addReply(c,shared.queued);
+        } else {
+            call(c,CMD_CALL_FULL);
+            c-&gt;woff = server.master_repl_offset;
+            if (listLength(server.ready_keys))
+                handleClientsBlockedOnLists();
+        }
+        return C_OK;
+    }
+
+    void call(client *c, int flags) {
+        ... ...
+        /* Call the command. */
+        dirty = server.dirty;
+        // 记录起始时间，使用 us 时间戳
+        start = ustime();
+        c-&gt;cmd-&gt;proc(c);
+        // 计算耗时
+        duration = ustime()-start;
+        dirty = server.dirty-dirty;
+        if (dirty &lt; 0) dirty = 0;
+        ... ...
+        ... ...
+        if (flags &amp; CMD_CALL_STATS) {
+            // 更新总耗时
+            c-&gt;lastcmd-&gt;microseconds += duration;
+            // 更新总执行数量
+            c-&gt;lastcmd-&gt;calls++;
+        }
+    }
+</code></pre>
+
+<p>需要额外补充的是，redis 在<code class="language-plaintext highlighter-rouge">multi-exec</code> 执行过程中会将所有包含的指令统计为 <code class="language-plaintext highlighter-rouge">execCommand</code>:</p>
+
+<pre><code class="language-C">    void execCommand(client *c) {
+        ... ...
+        // 依次执行所有缓存的`mult-exec`指令
+        for (j = 0; j &lt; c-&gt;mstate.count; j++) {
+            c-&gt;argc = c-&gt;mstate.commands[j].argc;
+            c-&gt;argv = c-&gt;mstate.commands[j].argv;
+            c-&gt;cmd = c-&gt;mstate.commands[j].cmd;
+
+            /* Propagate a MULTI request once we encounter the first command which
+            * is not readonly nor an administrative one.
+            * This way we'll deliver the MULTI/..../EXEC block as a whole and
+            * both the AOF and the replication link will have the same consistency
+            * and atomicity guarantees. */
+            if (!must_propagate &amp;&amp; !(c-&gt;cmd-&gt;flags &amp; (CMD_READONLY|CMD_ADMIN))) {
+                execCommandPropagateMulti(c);
+                must_propagate = 1;
+            }
+
+            // 调用执行对应的命令
+            call(c,server.loading ? CMD_CALL_NONE : CMD_CALL_FULL);
+
+            /* Commands may alter argc/argv, restore mstate. */
+            c-&gt;mstate.commands[j].argc = c-&gt;argc;
+            c-&gt;mstate.commands[j].argv = c-&gt;argv;
+            c-&gt;mstate.commands[j].cmd = c-&gt;cmd;
+        }
+        ... ...
+    }
+</code></pre>
+
+<p>结合 <code class="language-plaintext highlighter-rouge">processCommand</code> 函数的代码，在执行 <code class="language-plaintext highlighter-rouge">exec</code>请求时已经赋值 <code class="language-plaintext highlighter-rouge">c-&gt;lastcmd=execCommand</code>，在调用<code class="language-plaintext highlighter-rouge">call</code> 函数执行 <code class="language-plaintext highlighter-rouge">execCommand</code> 时会在结束后累计一个执行次数，而在 <code class="language-plaintext highlighter-rouge">execCommand</code> 内部调用 <code class="language-plaintext highlighter-rouge">call</code> 也会累计 N （mulit-exec打包的命令个数）个执行次数，而这些执行都会累计到 <code class="language-plaintext highlighter-rouge">c-&gt;lastcmd</code> 即 <code class="language-plaintext highlighter-rouge">exec</code> 上，即会累计 <code class="language-plaintext highlighter-rouge">N+1</code> 个 <code class="language-plaintext highlighter-rouge">execCommand</code>调用次数:</p>
+
+<p><img class="mermaid" src="https://mermaid.ink/svg/eyJjb2RlIjoiZmxvd2NoYXJ0IFRCXG5zdGFydChbc3RhcnRdKVxuZXhpdChbZW5kXSlcbiUlLVxucHJvY2Vzc1twcm9jY2Vzc0NvbW1hbmQ6IDxicj4gYy0-bGFzdGNtZD1leGVjQ29tbWFuZF1cbm11bHRpW3Byb2NjZXNzQ29tbWFuZDpjYWxsOjxicj5leGVjQ29tbWFuZCBzdGFydF1cbm5leHR7cHJvY2Nlc3NDb21tYW5kOmNhbGw6PGJyPmV4ZWNDb21tYW5kOjxicj5uZXh0IGNvbW1hbmQ_fVxucnVuW3Byb2NjZXNzQ29tbWFuZDpjYWxsOjxicj5leGVjQ29tbWFuZDpjYWxsOjxicj4gcnVuIHh4IGNvbW1hbmQsIGMtPmxhc3RjbWQtPmNhbGxzKytdXG5yZXR1cm5bcHJvY2Nlc3NDb21tYW5kOmNhbGw6PGJyPmV4ZWNDb21tYW5kIGVuZCwgYy0-bGFzdGNtZC0-Y2FsbHMrK11cbiUlLVxuc3RhcnQtLT5wcm9jZXNzLS0-bXVsdGktLT5uZXh0XG5uZXh0LS0-fE5vfHJldHVybi0tPmV4aXRcbm5leHQtLT58WWVzfHJ1bi0tPm5leHQiLCJtZXJtYWlkIjpudWxsfQ"></p>
+
+<h3 id="perf-sched">perf sched</h3>
+
+<p>perf sched timehist 示例如下：</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    perf sched record <span class="nt">--</span> <span class="nb">sleep </span>1
+    perf sched timehist
+
+            <span class="nb">time    </span>cpu    task name             <span class="nb">wait time  </span>sch delay   run <span class="nb">time</span>
+                           <span class="o">[</span>tid/pid]              <span class="o">(</span>msec<span class="o">)</span>     <span class="o">(</span>msec<span class="o">)</span>     <span class="o">(</span>msec<span class="o">)</span>
+    <span class="nt">--------------</span> <span class="nt">------</span>  <span class="nt">--------------------</span>  <span class="nt">---------</span>  <span class="nt">---------</span>  <span class="nt">---------</span>
+    79371.874569 <span class="o">[</span>0011]  gcc[31949]                0.014      0.000      1.148
+    79371.874591 <span class="o">[</span>0010]  gcc[31951]                0.000      0.000      0.024
+    79371.874603 <span class="o">[</span>0010]  migration/10[59]          3.350      0.004      0.011
+    79371.874604 <span class="o">[</span>0011]  &lt;idle&gt;                    1.148      0.000      0.035
+    79371.874723 <span class="o">[</span>0005]  &lt;idle&gt;                    0.016      0.000      1.383
+    79371.874746 <span class="o">[</span>0005]  gcc[31949]                0.153      0.078      0.022           
+</code></pre></div></div>
+
+<p>输出项说明：</p>
+
+<ul>
+  <li>wait time：在 sched-out 和 下一个 sched-in 之间的间隔；</li>
+  <li>sch delay：在 wakeup 时间 和 实际 running 之间的间隔；</li>
+  <li>run time：task 实际处于 running 的时间；</li>
+</ul>
+
+<p>可以通过 <code class="language-plaintext highlighter-rouge">perf list | grep sched</code> 查看系统中所有的 tracepoint，核心的 tracepoint 为：</p>
+
+<ul>
+  <li>sched_switch：记录 cpu 上 task 切换的事件，从 prev 切换到 next；</li>
+  <li>sched_wakeup：记录唤醒 task 的时间，记录唤醒 p 和 current；</li>
+  <li>sched_waking：3.10 中不支持此 tracepoint；</li>
+  <li>sched_migrate_task：记录 task 迁移到目的 cpu 事件，p 切换到 dest_cpu；</li>
+</ul>
+
+<p>除此外还有 state 类型，用于统计 delay 时间：</p>
+
+<ul>
+  <li>sched_stat_blocked：任务不可中断时间；</li>
+  <li>sched_stat_iowait：由于等待 IO 完成，任务不可运行的时间；</li>
+  <li>sched_stat_runtime：记录在 cpu 上执行的时间；</li>
+  <li>sched_stat_sleep：任务不可运行的时间，包括 io_wait；</li>
+  <li>sched_stat_wait：由于调度程序争，任务可执行而未执行的延迟时间；</li>
+</ul>
+
+<p>上述的 timehist 即是通过 state 进行统计：</p>
+
+<ul>
+  <li>t = time of current schedule out event</li>
+  <li>tprev = time of previous sched out event also time of schedule-in event for current task</li>
+  <li>last_time = time of last sched change event for current task(i.e, time process was last scheduled out)</li>
+  <li>ready_to_run = time of wakeup for current task</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  -----|------------|------------|------------|------
+      last         ready        tprev         t
+      time         to run
+       |-------- wait time ------|
+                   |- sch delay -|- run time -|
+</code></pre></div></div>
+
+<h3 id="stap-使用">stap 使用</h3>
+
+<p>stap -L “syscall.*” 可以查看当前操作系统支持探测的 event，和 event 中携带的参数：</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>stap <span class="nt">-L</span> <span class="s2">"syscall.*"</span> 
+... ...
+syscall.read name:string fd:long buf_uaddr:long count:long argstr:string
+... ...
+syscall.write name:string fd:long buf_uaddr:long count:long buf_str:string argstr:string
+... ...
+</code></pre></div></div>
+
+<p>使用 stap 命令进行编译运行时会经过如下步骤<sup id="fnref:7" role="doc-noteref"><a href="#fn:7" class="footnote" rel="footnote">4</a></sup>：</p>
+
+<ol>
+  <li>
+    <p>首先，SystemTap 根据现有的 Tapset 库（通常在 /usr/share/systemtap/tapset/ 中) 检查使用的任何 Tapset。SystemTap 将用它们在 Tapset 库中的相应定义替换任何找到的 Tapset;</p>
+  </li>
+  <li>
+    <p>SystemTap 然后将脚本转换为 C，运行系统 C 编译器以从中创建内核模块。执行此步骤的工具包含在 systemtap 包中（有关详细信息，请参阅第 2.1.1 节“安装 SystemTap”）;</p>
+  </li>
+  <li>
+    <p>SystemTap 加载模块，然后启用脚本中的所有探测器（事件和处理程序）。 systemtap-runtime 包中的 staprun（有关更多信息，请参阅第 2.1.1 节“安装 SystemTap”）提供此功能。</p>
+  </li>
+  <li>
+    <p>随着事件的发生，它们相应的处理程序被执行。</p>
+  </li>
+  <li>
+    <p>一旦 SystemTap 会话终止，探测器将被禁用，内核模块将被卸载。</p>
+  </li>
+</ol>
+
+<p>编译和运行命令如下：</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># CONFIG_MODVERSIONS 指定内核检查时根据 symbol，跳过 magic 检查；</span>
+<span class="c"># -p4 指定stap 只执行到第 4 步即输出内核模块 xx.ko, 第 5 步为安装执行。 </span>
+<span class="nb">sudo </span>stap <span class="nt">-vv</span> <span class="nt">-B</span> <span class="nv">CONFIG_MODVERSIONS</span><span class="o">=</span>y <span class="nt">-p4</span> <span class="nt">-g</span> xx.stp <span class="nt">-m</span> xx
+
+<span class="c"># 指定 pid</span>
+<span class="nb">sudo </span>staprun xx.ko <span class="nt">-x</span> <span class="nv">$pid</span>
+
+<span class="c"># 指定执行的命令，并监听 可以直接在 stap 脚本中通过 target() 获取 pid.</span>
+<span class="nb">sudo </span>staprun xx.ko <span class="nt">-c</span> <span class="nv">$command</span> 
+</code></pre></div></div>
+
+<h2 id="参考引用">参考引用</h2>
+
+<div class="footnotes" role="doc-endnotes">
+  <ol>
+    <li id="fn:1" role="doc-endnote">
+      <p>redis_psync_protocol(1). Zhipeng Wang. Jan 06 2022, https://saffraan.github.io/redis_psync_protocol(1)/#%E5%91%BD%E4%BB%A4%E5%90%8C%E6%AD%A5 <a href="#fnref:1" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:3" role="doc-endnote">
+      <p>perf sched.. https://zhuanlan.zhihu.com/p/143320517 <a href="#fnref:3" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:2" role="doc-endnote">
+      <p>man epoll(7). linux. Sep 15 2017, https://man7.org/linux/man-pages/man7/epoll.7.html <a href="#fnref:2" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+    <li id="fn:7" role="doc-endnote">
+      <p>SystemTap Beginners Guide. sourceware.org. May 09 2022, https://sourceware.org/systemtap/SystemTap_Beginners_Guide/understanding-how-systemtap-works.html#understanding-architecture-tools <a href="#fnref:7" class="reversefootnote" role="doc-backlink">↩</a></p>
+    </li>
+  </ol>
+</div>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2022-05-10T00:00:00+08:00">May 10, 2022</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+
+  <a href="https://twitter.com/intent/tweet?text=Set_benchmark_analyse%20http%3A%2F%2Flocalhost%3A4000%2Fset_benchmark_analyse%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flocalhost%3A4000%2Fset_benchmark_analyse%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flocalhost%3A4000%2Fset_benchmark_analyse%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/redis_psync_protocol(1)/" class="pagination--pager" title="Redis_psync_protocol(1)
+">Previous</a>
+    
+    
+      <a href="#" class="pagination--pager disabled">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/redis_psync_protocol(1)/" rel="permalink">Redis_psync_protocol(1)
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          47 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">
+
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/redis_psync_protocol/" rel="permalink">Redis_psync_protocol
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          14 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">
+
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/design_pattern/" rel="permalink">Design_pattern
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          38 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">
+
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/computer_boundary/" rel="permalink">Computer_boundary
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          2 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">
+
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">© 2022 ZhipengWang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

@@ -22,4 +22,10 @@ var store = [{
         "tags": [],
         "url": "/redis_psync_protocol(1)/",
         "teaser": null
+      },{
+        "title": "Set_benchmark_analyse",
+        "excerpt":"记一次测试分析(开启 pipeline 时 slave 对 SET 耗时影响) 背景介绍 在工作过程中，测试同事反馈在如下 case 中 redis 的 get 指令性能要明显优于 set 指令性能： redis-benchmark -h $IP -p $PORT -a $PASSWD -r 4000000 -n 5000000 -t set,get -d 500 -c 500 -P 16 ...... 78143.31 requests per second // set ...... 175389.38 requests per second // get...","categories": [],
+        "tags": [],
+        "url": "/set_benchmark_analyse/",
+        "teaser": null
       }]
