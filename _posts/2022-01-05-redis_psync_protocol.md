@@ -30,7 +30,7 @@ sequenceDiagram
     Note left of Slave: REPL_STATE_SEND_PSYNC
 
     alt replid + offset is exists
-        Slave ->> Master: PSYNC replid offset
+        Slave ->> Master: PSYNC replid offset + 1
     else
         Slave ->> Master: PSYNC ? -1
     end
@@ -493,7 +493,7 @@ server.repl_backlog_off：
 
     redisServer 中有多处 `offset`，对于 `master` 而言最重要的是`master_repl_offset`，这是用于记录当前同步数据的最高水位，在向 `backlog`中写入数据时会按 data_bytes_len 向上累加 ；对于 `slave` 而言最重要的是 `master->reploff`，这是用于记录同步完成（即已经被成功执行）数据的最高水位，会按同步成功数据的 data_bytes_len 向上累加。
 
-    在 failover 后，`new master` 会继承上一轮的 `offset` 继续向上累加。
+    在 failover 后，`new master` 会继承上一轮的 `offset` 继续向上累加。简单的说 **PSYNC replid offset 发送的是当前的 replid 和 期待数据的起始偏移(已经处理的数据偏移量 + 1)**。
 
 ## backlog
 
