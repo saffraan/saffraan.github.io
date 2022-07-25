@@ -353,7 +353,7 @@
 
 <p>从 1~5 过程中，slave 状态依次经过如下变迁： <code class="language-plaintext highlighter-rouge">REPL_STATE_NONE -&gt; REPL_STATE_CONNECT -&gt; REPL_STATE_CONNECTING -&gt; REPL_STATE_RECEIVE_PONG -&gt; REPL_STATE_SEND_AUTH -&gt; REPL_STATE_RECEIVE_AUTH -&gt; REPL_STATE_SEND_PORT -&gt; REPL_STATE_RECEIVE_PORT -&gt; REPL_STATE_SEND_IP -&gt; REPL_STATE_RECEIVE_IP -&gt; REPL_STATE_SEND_CAPA -&gt; REPL_STATE_RECEIVE_CAPA -&gt; REPL_STATE_RECEIVE_PSYNC</code></p>
 
-<p><img class="mermaid" src="https://mermaid.ink/svg/eyJjb2RlIjoic2VxdWVuY2VEaWFncmFtXG5wYXJ0aWNpcGFudCBTbGF2ZVxucGFydGljaXBhbnQgTWFzdGVyXG5Ob3RlIGxlZnQgb2YgU2xhdmU6IFJFUExfU1RBVEVfU0VORF9QU1lOQ1xuJSUtXG5hbHQgcmVwbGlkICsgb2Zmc2V0IGlzIGV4aXN0c1xuU2xhdmUgLT4-IE1hc3RlcjogUFNZTkMgcmVwbGlkIG9mZnNldFxuZWxzZVxuU2xhdmUgLT4-IE1hc3RlcjogUFNZTkMgPyAtMVxuZW5kXG4lJS1cbk5vdGUgbGVmdCBvZiBTbGF2ZTogUkVQTF9TVEFURV9SRUNFSVZFX1BTWU5DXG5hbHQgRlVMTCBSRVNZTkNcbk1hc3RlciAtPj4gU2xhdmU6ICtGVUxMUkVTWU5DIHJlcGxpZCBvZmZzZXRcblNsYXZlIC0-PiBTbGF2ZTogdXBkYXRlIG1hc3Rlcl9yZXBsaWQgYW5kIG1hc3Rlcl9pbml0aWFsX29mZnNldFxuJSUtXG5Ob3RlIG92ZXIgU2xhdmUsIE1hc3RlcjogRlVMTCBTWU5DXG4lJS1cbmVsc2UgUFNZTkNcbk1hc3RlciAtPj4gU2xhdmU6ICtDT05USU5VRSByZXBsaWRcbk5vdGUgbGVmdCBvZiBTbGF2ZTogUkVQTF9TVEFURV9DT05ORUNURURcbmVuZFxuJSUtIiwibWVybWFpZCI6bnVsbH0"></p>
+<p><img class="mermaid" src="https://mermaid.ink/svg/eyJjb2RlIjoic2VxdWVuY2VEaWFncmFtXG5wYXJ0aWNpcGFudCBTbGF2ZVxucGFydGljaXBhbnQgTWFzdGVyXG5Ob3RlIGxlZnQgb2YgU2xhdmU6IFJFUExfU1RBVEVfU0VORF9QU1lOQ1xuJSUtXG5hbHQgcmVwbGlkICsgb2Zmc2V0IGlzIGV4aXN0c1xuU2xhdmUgLT4-IE1hc3RlcjogUFNZTkMgcmVwbGlkIG9mZnNldCArIDFcbmVsc2VcblNsYXZlIC0-PiBNYXN0ZXI6IFBTWU5DID8gLTFcbmVuZFxuJSUtXG5Ob3RlIGxlZnQgb2YgU2xhdmU6IFJFUExfU1RBVEVfUkVDRUlWRV9QU1lOQ1xuYWx0IEZVTEwgUkVTWU5DXG5NYXN0ZXIgLT4-IFNsYXZlOiArRlVMTFJFU1lOQyByZXBsaWQgb2Zmc2V0XG5TbGF2ZSAtPj4gU2xhdmU6IHVwZGF0ZSBtYXN0ZXJfcmVwbGlkIGFuZCBtYXN0ZXJfaW5pdGlhbF9vZmZzZXRcbiUlLVxuTm90ZSBvdmVyIFNsYXZlLCBNYXN0ZXI6IEZVTEwgU1lOQ1xuJSUtXG5lbHNlIFBTWU5DXG5NYXN0ZXIgLT4-IFNsYXZlOiArQ09OVElOVUUgcmVwbGlkXG5Ob3RlIGxlZnQgb2YgU2xhdmU6IFJFUExfU1RBVEVfQ09OTkVDVEVEXG5lbmRcbiUlLSIsIm1lcm1haWQiOm51bGx9"></p>
 
 <p>当 <code class="language-plaintext highlighter-rouge">master</code> 返回<code class="language-plaintext highlighter-rouge">+CONTINUE replid</code>时，<code class="language-plaintext highlighter-rouge">slave node</code> 进入 <code class="language-plaintext highlighter-rouge">REPL_STATE_CONNECTED</code>状态，开始接收 <code class="language-plaintext highlighter-rouge">master node</code> 同步过来的命令。</p>
 
@@ -577,7 +577,7 @@ int masterTryPartialResynchronization(client *c) {
         // 保留 master 发送的 replid
         // server.master_replid = replid
         memcpy(server.master_replid, replid, offset-replid-1);
-        server.master_replid[CONFIG_RUN_ID_SIZE] = '&lt;!JEKYLL@47435012727920@155&gt;';
+        server.master_replid[CONFIG_RUN_ID_SIZE] = '&lt;!JEKYLL@47301274482220@155&gt;';
         // 保留 master 发送的 offset
         // server.master_initial_offset = offset
         server.master_initial_offset = strtoll(offset,NULL,10);
@@ -791,7 +791,7 @@ master 视角：</p>
 
     <p>redisServer 中有多处 <code class="language-plaintext highlighter-rouge">offset</code>，对于 <code class="language-plaintext highlighter-rouge">master</code> 而言最重要的是<code class="language-plaintext highlighter-rouge">master_repl_offset</code>，这是用于记录当前同步数据的最高水位，在向 <code class="language-plaintext highlighter-rouge">backlog</code>中写入数据时会按 data_bytes_len 向上累加 ；对于 <code class="language-plaintext highlighter-rouge">slave</code> 而言最重要的是 <code class="language-plaintext highlighter-rouge">master-&gt;reploff</code>，这是用于记录同步完成（即已经被成功执行）数据的最高水位，会按同步成功数据的 data_bytes_len 向上累加。</p>
 
-    <p>在 failover 后，<code class="language-plaintext highlighter-rouge">new master</code> 会继承上一轮的 <code class="language-plaintext highlighter-rouge">offset</code> 继续向上累加。</p>
+    <p>在 failover 后，<code class="language-plaintext highlighter-rouge">new master</code> 会继承上一轮的 <code class="language-plaintext highlighter-rouge">offset</code> 继续向上累加。简单的说 <strong>PSYNC replid offset 发送的是当前的 replid 和 期待数据的起始偏移(已经处理的数据偏移量 + 1)</strong>。</p>
   </li>
 </ol>
 
