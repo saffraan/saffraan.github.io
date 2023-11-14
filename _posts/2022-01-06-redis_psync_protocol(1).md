@@ -4,7 +4,7 @@ toc: true
 classes: wide
 ---
 <style>
-    p { font: 0.875rem YaHei !important; }
+   @import url("/assets/css/simple.css")
 </style>
 
 # Redis psync protocol(续)

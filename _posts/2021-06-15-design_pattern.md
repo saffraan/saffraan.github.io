@@ -3,8 +3,8 @@ layout: single
 toc: true
 mermaid: true
 ---
-<style>
-    p { font: 0.875rem YaHei !important; }
+<style type="text/css">
+@import url("/assets/css/simple.css")
 </style>
 
 # Design Pattern
@@ -446,7 +446,9 @@ Player-->GameService
 GameServiceSetter..>GameService
 Player..|>GameServiceSetter
 ```
+
 golang的示例代码如下：
+
 ``` go
 type GameService interface{
     Auth(name, passwd string) bool
@@ -564,6 +566,7 @@ func NewPlayer(..., ops ... Option)(p *Player){
 工厂模式，定义用于创建单个对象的接口，将实例化创建部分放在子类实现，让子类决定实例化哪个类。
 
 **使用场景**：当获取的资源对象可以通过另一个对象构造和管理时，适合使用工厂模式。例如：`player`在`Game`中创建一个 `Room`，可以选择不同的对战模式。
+
 ```mermaid!
 classDiagram
 class Room{

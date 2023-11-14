@@ -4,7 +4,7 @@ toc: true
 classes: wide
 ---
 <style>
-    p { font: 0.875rem YaHei !important; }
+  @import url("/assets/css/simple.css")
 </style>
 
 # 记一次测试分析(开启 pipeline 时 slave 对 SET 耗时影响)

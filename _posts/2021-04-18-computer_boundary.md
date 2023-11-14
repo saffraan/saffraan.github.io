@@ -3,7 +3,7 @@ layout: single
 toc: true
 ---
 <style>
-    p { font: 0.875rem YaHei !important; }
+  @import url("/assets/css/simple.css")
 </style>
 
 # Computer boundary

@@ -1,0 +1,28 @@
+p {
+  font: 0.875rem 'Microsoft YaHei', sans-serif !important;
+}
+
+pre>code[class*="language-"] {
+  font-size: 0.75rem !important;
+}
+
+pre {
+  border: 1px solid #ccc;
+  padding: 4px;
+  border-radius: 5px; /* 为边框添加5像素的圆角 */
+}
+
+ul {
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+ol {
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+img.mermaid {
+  width: 20;
+  font-size: 16px; 
+}
