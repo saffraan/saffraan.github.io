@@ -380,8 +380,8 @@
             </nav>
           </aside>
         
-        <style>
-    p { font: 0.875rem YaHei !important; }
+        <style type="text/css">
+@import url("/assets/css/simple.css")
 </style>
 
 <h1 id="design-pattern">Design Pattern</h1>
@@ -674,8 +674,10 @@
 
 <p><strong>使用场景</strong>：简单的说调用方的实现依赖于某个类或服务，该类或服务是它实现上的一个有效组成部分，需要在初始化或者某个流程步骤将依赖类的对象传递给调用方。例如：<code class="language-plaintext highlighter-rouge">player</code>在一个游戏中需要切换不同的游戏模式。</p>
 
-<p><img class="mermaid" src="https://mermaid.ink/svg/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG5jbGFzcyBQbGF5ZXJ7XG5zZXJ2aWNlIEdhbWVTZXJ2aWNlXG5Mb2dpbigpXG5TZXRTZXJ2aWNlKEdhbWVTZXJ2aWNlKVxufVxuJSUtXG5jbGFzcyBHYW1lU2VydmljZVNldHRlcntcblNldFNlcnZpY2UoR2FtZVNlcnZpY2UpXG59XG48PGludGVyZmFjZT4-IEdhbWVTZXJ2aWNlU2V0dGVyXG4lJS1cbmNsYXNzIEdhbWVTZXJ2aWNle1xuQXV0aCgpXG5TdGFydCgpXG59XG48PGludGVyZmFjZT4-IEdhbWVTZXJ2aWNlXG4lJS1cbmNsYXNzIExvY2FsU2VydmljZXtcbkF1dGgoKVxuU3RhcnQoKVxufVxuJSUtXG5jbGFzcyBPbmxpbmVTZXJ2aWNle1xuQXV0aCgpXG5TdGFydCgpXG59XG5Mb2NhbFNlcnZpY2UgLi58PiBHYW1lU2VydmljZVxuT25saW5lU2VydmljZSAuLnw-IEdhbWVTZXJ2aWNlXG5QbGF5ZXItLT5HYW1lU2VydmljZVxuR2FtZVNlcnZpY2VTZXR0ZXIuLj5HYW1lU2VydmljZVxuUGxheWVyLi58PkdhbWVTZXJ2aWNlU2V0dGVyIiwibWVybWFpZCI6bnVsbH0">
-golang的示例代码如下：</p>
+<p><img class="mermaid" src="https://mermaid.ink/svg/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG5jbGFzcyBQbGF5ZXJ7XG5zZXJ2aWNlIEdhbWVTZXJ2aWNlXG5Mb2dpbigpXG5TZXRTZXJ2aWNlKEdhbWVTZXJ2aWNlKVxufVxuJSUtXG5jbGFzcyBHYW1lU2VydmljZVNldHRlcntcblNldFNlcnZpY2UoR2FtZVNlcnZpY2UpXG59XG48PGludGVyZmFjZT4-IEdhbWVTZXJ2aWNlU2V0dGVyXG4lJS1cbmNsYXNzIEdhbWVTZXJ2aWNle1xuQXV0aCgpXG5TdGFydCgpXG59XG48PGludGVyZmFjZT4-IEdhbWVTZXJ2aWNlXG4lJS1cbmNsYXNzIExvY2FsU2VydmljZXtcbkF1dGgoKVxuU3RhcnQoKVxufVxuJSUtXG5jbGFzcyBPbmxpbmVTZXJ2aWNle1xuQXV0aCgpXG5TdGFydCgpXG59XG5Mb2NhbFNlcnZpY2UgLi58PiBHYW1lU2VydmljZVxuT25saW5lU2VydmljZSAuLnw-IEdhbWVTZXJ2aWNlXG5QbGF5ZXItLT5HYW1lU2VydmljZVxuR2FtZVNlcnZpY2VTZXR0ZXIuLj5HYW1lU2VydmljZVxuUGxheWVyLi58PkdhbWVTZXJ2aWNlU2V0dGVyIiwibWVybWFpZCI6bnVsbH0"></p>
+
+<p>golang的示例代码如下：</p>
+
 <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">GameService</span> <span class="k">interface</span><span class="p">{</span>
     <span class="n">Auth</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">passwd</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">bool</span>
     <span class="n">Start</span><span class="p">()</span>
@@ -792,8 +794,9 @@ golang的示例代码如下：</p>
 <h3 id="factory-method">Factory method</h3>
 <p>工厂模式，定义用于创建单个对象的接口，将实例化创建部分放在子类实现，让子类决定实例化哪个类。</p>
 
-<p><strong>使用场景</strong>：当获取的资源对象可以通过另一个对象构造和管理时，适合使用工厂模式。例如：<code class="language-plaintext highlighter-rouge">player</code>在<code class="language-plaintext highlighter-rouge">Game</code>中创建一个 <code class="language-plaintext highlighter-rouge">Room</code>，可以选择不同的对战模式。
-<img class="mermaid" src="https://mermaid.ink/svg/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG5jbGFzcyBSb29te1xuK0pvaW4oKVxufVxuPDxpbnRlcmZhY2U-PiBSb29tXG4lJS1cbmNsYXNzIHB2cFJvb217XG4taW50IGNhcGFjaXR5XG4rSm9pbigpXG59XG4lJS1cbmNsYXNzIHB2Y1Jvb217XG4taW50IGNhcGFjaXR5XG4rSm9pbigpXG59XG4lJS1cbiUlIG1ha2VSb29tIGlzIDw8aW50ZXJmYWNlPj4gZnVuY3Rpb25cbmNsYXNzIEdhbWV7XG4tTGlzdH5Sb29tfiByb29tc1xuK09wZW5Sb29tKCkgUm9vbVxubWFrZVJvb20oKSogUm9vbVxufVxuJSUtXG5jbGFzcyBwdmNHYW1le1xubWFrZVJvb20oKSBSb29tXG59XG4lJS1cbmNsYXNzIHB2cEdhbWV7XG5tYWtlUm9vbSgpIFJvb21cbn1cbiUlLVxucHZjUm9vbSAuLnw-IFJvb21cbnB2Y0dhbWUuLj5wdmNSb29tXG5wdmNHYW1lLS18PkdhbWVcbnB2cFJvb20gLi58PiBSb29tXG5wdnBHYW1lLi4-cHZwUm9vbVxucHZwR2FtZS0tfD5HYW1lXG5HYW1lLi4-Um9vbSIsIm1lcm1haWQiOm51bGx9"></p>
+<p><strong>使用场景</strong>：当获取的资源对象可以通过另一个对象构造和管理时，适合使用工厂模式。例如：<code class="language-plaintext highlighter-rouge">player</code>在<code class="language-plaintext highlighter-rouge">Game</code>中创建一个 <code class="language-plaintext highlighter-rouge">Room</code>，可以选择不同的对战模式。</p>
+
+<p><img class="mermaid" src="https://mermaid.ink/svg/eyJjb2RlIjoiY2xhc3NEaWFncmFtXG5jbGFzcyBSb29te1xuK0pvaW4oKVxufVxuPDxpbnRlcmZhY2U-PiBSb29tXG4lJS1cbmNsYXNzIHB2cFJvb217XG4taW50IGNhcGFjaXR5XG4rSm9pbigpXG59XG4lJS1cbmNsYXNzIHB2Y1Jvb217XG4taW50IGNhcGFjaXR5XG4rSm9pbigpXG59XG4lJS1cbiUlIG1ha2VSb29tIGlzIDw8aW50ZXJmYWNlPj4gZnVuY3Rpb25cbmNsYXNzIEdhbWV7XG4tTGlzdH5Sb29tfiByb29tc1xuK09wZW5Sb29tKCkgUm9vbVxubWFrZVJvb20oKSogUm9vbVxufVxuJSUtXG5jbGFzcyBwdmNHYW1le1xubWFrZVJvb20oKSBSb29tXG59XG4lJS1cbmNsYXNzIHB2cEdhbWV7XG5tYWtlUm9vbSgpIFJvb21cbn1cbiUlLVxucHZjUm9vbSAuLnw-IFJvb21cbnB2Y0dhbWUuLj5wdmNSb29tXG5wdmNHYW1lLS18PkdhbWVcbnB2cFJvb20gLi58PiBSb29tXG5wdnBHYW1lLi4-cHZwUm9vbVxucHZwR2FtZS0tfD5HYW1lXG5HYW1lLi4-Um9vbSIsIm1lcm1haWQiOm51bGx9"></p>
 
 <p>golang的示例代码如下：</p>
 <div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">Room</span> <span class="k">interface</span><span class="p">{</span>
@@ -3882,6 +3885,47 @@ ROUTINE ======================== main.main.func1 in /Users/wangzhipeng/workspace
     
     <h2 class="archive__item-title no_toc" itemprop="headline">
       
+        <a href="/dns/" rel="permalink">Dns
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          6 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">
+
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
         <a href="/set_benchmark_analyse/" rel="permalink">Set_benchmark_analyse
 </a>
       
@@ -3996,47 +4040,6 @@ ROUTINE ======================== main.main.func1 in /Users/wangzhipeng/workspace
 </div>
 
         
-          
-
-
-
-<div class="grid__item">
-  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
-    
-    <h2 class="archive__item-title no_toc" itemprop="headline">
-      
-        <a href="/computer_boundary/" rel="permalink">Computer_boundary
-</a>
-      
-    </h2>
-    
-
-  <p class="page__meta">
-    
-
-    
-
-    
-      
-      
-
-      <span class="page__meta-readtime">
-        <i class="far fa-clock" aria-hidden="true"></i>
-        
-          2 minute read
-        
-      </span>
-    
-  </p>
-
-
-    <p class="archive__item-excerpt" itemprop="description">
-
-</p>
-  </article>
-</div>
-
-        
       </div>
     </div>
   
@@ -4078,7 +4081,7 @@ ROUTINE ======================== main.main.func1 in /Users/wangzhipeng/workspace
   </ul>
 </div>
 
-<div class="page__footer-copyright">© 2022 ZhipengWang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+<div class="page__footer-copyright">© 2023 ZhipengWang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
 
       </footer>
     </div>

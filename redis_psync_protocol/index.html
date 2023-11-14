@@ -331,7 +331,7 @@
           </aside>
         
         <style>
-    p { font: 0.875rem YaHei !important; }
+  @import url("/assets/css/simple.css")
 </style>
 
 <h1 id="redis-psync-protocol">Redis psync protocol</h1>
@@ -577,7 +577,7 @@ int masterTryPartialResynchronization(client *c) {
         // 保留 master 发送的 replid
         // server.master_replid = replid
         memcpy(server.master_replid, replid, offset-replid-1);
-        server.master_replid[CONFIG_RUN_ID_SIZE] = '&lt;!JEKYLL@47301274482220@155&gt;';
+        server.master_replid[CONFIG_RUN_ID_SIZE] = '&lt;!JEKYLL@46963762624600@155&gt;';
         // 保留 master 发送的 offset
         // server.master_initial_offset = offset
         server.master_initial_offset = strtoll(offset,NULL,10);
@@ -1242,6 +1242,47 @@ void replicationSetMaster(char *ip, int port) {
     
     <h2 class="archive__item-title no_toc" itemprop="headline">
       
+        <a href="/dns/" rel="permalink">Dns
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          6 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">
+
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
         <a href="/set_benchmark_analyse/" rel="permalink">Set_benchmark_analyse
 </a>
       
@@ -1342,48 +1383,7 @@ void replicationSetMaster(char *ip, int port) {
       <span class="page__meta-readtime">
         <i class="far fa-clock" aria-hidden="true"></i>
         
-          38 minute read
-        
-      </span>
-    
-  </p>
-
-
-    <p class="archive__item-excerpt" itemprop="description">
-
-</p>
-  </article>
-</div>
-
-        
-          
-
-
-
-<div class="grid__item">
-  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
-    
-    <h2 class="archive__item-title no_toc" itemprop="headline">
-      
-        <a href="/computer_boundary/" rel="permalink">Computer_boundary
-</a>
-      
-    </h2>
-    
-
-  <p class="page__meta">
-    
-
-    
-
-    
-      
-      
-
-      <span class="page__meta-readtime">
-        <i class="far fa-clock" aria-hidden="true"></i>
-        
-          2 minute read
+          26 minute read
         
       </span>
     
@@ -1438,7 +1438,7 @@ void replicationSetMaster(char *ip, int port) {
   </ul>
 </div>
 
-<div class="page__footer-copyright">© 2022 ZhipengWang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+<div class="page__footer-copyright">© 2023 ZhipengWang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
 
       </footer>
     </div>

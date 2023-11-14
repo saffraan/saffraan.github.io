@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.22.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+--><html lang="zh" class="no-js">
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Dns - Newbee</title>
+<meta name="description" content="">
+
+
+  <meta name="author" content="Zhipeng Wang">
+  
+  <meta property="article:author" content="Zhipeng Wang">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:site_name" content="Newbee">
+<meta property="og:title" content="Dns">
+<meta property="og:url" content="http://localhost:4000/dns/">
+
+
+  <meta property="og:description" content="">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2023-11-14T00:00:00+08:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="http://localhost:4000/dns/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "ZhipengWang",
+      "url": "http://localhost:4000/"
+    
+  }
+</script>
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Newbee Feed">
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          Newbee
+          <span class="site-subtitle">sharing knowledge</span>
+        </a>
+        <ul class="visible-links"></ul>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+        <img src="/assets/icons/bee.svg" alt="Zhipeng Wang" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">Zhipeng Wang</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>Software Engineer.</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
+          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name">SZ, CN.</span>
+        </li>
+      
+
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+
+      
+
+      
+        <li>
+          <a href="mailto:wangzhipenghyc@163.com">
+            <meta itemprop="email" content="wangzhipenghyc@163.com">
+            <i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i><span class="label">Email</span>
+          </a>
+        </li>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Dns">
+    <meta itemprop="description" content="">
+    <meta itemprop="datePublished" content="2023-11-14T00:00:00+08:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Dns
+</h1>
+          
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          5 minute read
+        
+      </span>
+    
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right ">
+            <nav class="toc">
+              <header><h4 class="nav__title">
+<i class="fas fa-file-alt"></i> On this page</h4></header>
+              <ul class="toc__menu"><li>
+<a href="#dns%E5%9F%9F%E5%90%8D%E8%A7%A3%E6%9E%90%E7%B3%BB%E7%BB%9F">DNS–域名解析系统</a><ul>
+<li><a href="#%E7%AE%80%E4%BB%8B">简介</a></li>
+<li><a href="#dns-%E5%90%8D%E5%AD%97%E7%A9%BA%E9%97%B4">DNS 名字空间</a></li>
+<li><a href="#%E5%9F%9F%E5%90%8D%E7%9A%84%E8%B5%84%E6%BA%90%E8%AE%B0%E5%BD%95">域名的资源记录</a></li>
+<li><a href="#%E5%9F%9F%E5%90%8D%E6%9C%8D%E5%8A%A1">域名服务</a></li>
+<li><a href="#gethostbyname">gethostbyname</a></li>
+<li><a href="#%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5">参考链接</a></li>
+</ul>
+</li></ul>
+
+            </nav>
+          </aside>
+        
+        <style type="text/css">
+  @import url("/assets/css/simple.css")
+</style>
+
+<h1 id="dns域名解析系统">DNS–域名解析系统</h1>
+
+<h2 id="简介">简介</h2>
+
+<p>DNS（domain name system） 是互联网的重要基础设施，它的作用很简单–把域名（domain name）解析为对应的 IP 地址。在互联网初期时网络主机有限，大家互相记住 IP 地址就好了，但是随着网络主机的增多，纯靠 IP 地址记录对用户不太友好，使用字符串来标识服务器地址更加方便记忆，于是主机名就诞生了。最开始主机名和IP地址之间的映射关系是通过一个简单的 host.txt 文件维护，每天晚上所有主机都从一个维护此文件的站点取回 host.txt。然而随着主机数量不断的增加，这个方案就愈发显得简陋且脆弱：首先这个文件会变得越来越大，其次主机名称冲突会越来越频繁。</p>
+
+<p>为了解决这一问题，DNS 被发明了出来，在 RFC 1034、1035、2181 中给出了 DNS 的定义，后来又有其他文档对其进行阐述。但无论如何发展，它的核心功能没有变化：将域名转化为 ip 地址。</p>
+
+<h2 id="dns-名字空间">DNS 名字空间</h2>
+
+<p>每个城市都有一些常见的街道名如：春风路、南京路等等，如果只用街道名是无法区别的，但是前面加上所属行政区域和城市名称，就可以确定具体地址。域名就类似邮政系统中的地址，它是分层次的，在域基础上去分割子域名，在同一个域下每个子域名要保证唯一性，不同域下的子域名可以重复。对于 internet ，命名层次的顶级由一个专门的组织负责管理– ICANN (Internet Corporation for Assigned Names and Numbers, Internet 名字与数字地址分配机构)，以 <code class="language-plaintext highlighter-rouge">www.baidu.com</code> 为例，<code class="language-plaintext highlighter-rouge">com</code> 就是最顶级的域名。</p>
+
+<p>顶级域名（TOP-Level）分为两种类型：通用的和国家或地区的，常见的通用域名如下：</p>
+
+<ul>
+  <li>com: 企业、商业，这是我们最常见的顶级域名；</li>
+  <li>edu: 教育，各个高校站点常用的域名；</li>
+  <li>gov: 政府机关常用的域名；</li>
+  <li>mil: 军事机构常用的域名；</li>
+  <li>int: 国际组织常用的域名；</li>
+  <li>net: 网络提供商；</li>
+  <li>org: 非盈利组织；</li>
+  <li>aero: 航空运输；</li>
+  <li>biz: 公司；</li>
+  <li>coop: 合作；</li>
+  <li>info: 信息；</li>
+  <li>museum: 博物馆；</li>
+  <li>name: 人；</li>
+  <li>pro: 专业；</li>
+  <li>cat: 代表加泰罗尼亚语言的网站;</li>
+  <li>jobs: 就业；</li>
+  <li>mobi: 移动设备；</li>
+  <li>tel: 联络资料；</li>
+  <li>travel: 旅游业；</li>
+</ul>
+
+<p>以上并非所有的通用顶级域名，可以看出来包含面比较广，包括常见的各行各业，实际中最常见的是 <code class="language-plaintext highlighter-rouge">com</code>、<code class="language-plaintext highlighter-rouge">edu</code>、<code class="language-plaintext highlighter-rouge">gov</code>、<code class="language-plaintext highlighter-rouge">net</code>。国家或地区的域名则可以很直观的反应站点所属的地域，在中文互联网比较常见：</p>
+
+<ul>
+  <li>cn: 中国</li>
+  <li>us: 美国</li>
+  <li>eu: 欧洲</li>
+  <li>jp: 日本</li>
+  <li>hk: 香港，表示所属地区</li>
+  <li>tw: 台湾，表示所属地区</li>
+</ul>
+
+<p>以上两者也可以组合使用，通常是在国家或地区的域下划分，例如：<code class="language-plaintext highlighter-rouge">.com.cn</code>，直观的表示为中国地区的商业网点。</p>
+
+<h2 id="域名的资源记录">域名的资源记录</h2>
+
+<p>无论是只有一台主机的域还是顶级域，每个域都有一组与它相关联的资源记录（resource record），这些记录组成了 DNS 数据库。一条资源记录有一个五元组构成：</p>
+
+<div class="language-mkd highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Domain_name Time_to_live Class Type Value
+</code></pre></div></div>
+
+<ul>
+  <li>Domain_name: 域名，是搜索的主要关键字</li>
+  <li>Time_to_live: 该条记录的有效周期，比较稳定的记录会分配一个长周期（如 86400s, 即一天），不稳定的记录则会分配一个小周期（如 60s）</li>
+  <li>Class: 对于 Internet 信息，它总是 IN。其他 class 还有:
+    <ul>
+      <li>CH（Chaosnet）：该类别今天很少使用，但最初是为 Chaosnet 设计的网络协议。</li>
+      <li>HS（Hesiod）：该类别今天也很少使用，但最初是为 Hesiod 命名系统设计的，该命名系统在某些类 Unix 的系统上使用。</li>
+      <li>ANY：此类别用作通配符，匹配任何类别记录。</li>
+    </ul>
+  </li>
+  <li>Type: 指出资源记录的类型。下面列出一些主要的 DNS 资源记录类型：
+    <ul>
+      <li>SOA</li>
+      <li>A：主机的 IPV4 地址</li>
+      <li>AAAA: 主机的 IPV6 地址</li>
+      <li>MX： 邮件交换，</li>
+      <li>NS： 域名服务器，本域的服务器名字</li>
+      <li>CNAME：规范名</li>
+      <li>PTR：指针，IP 地址的别名</li>
+      <li>SPF: 发送者的政策框架</li>
+      <li>SRV: 服务，提供服务的主机名</li>
+      <li>TXT: 文本，说明的 ASCII 文本</li>
+    </ul>
+  </li>
+</ul>
+
+<p>下面结合一个DNS数据库记录的示例，说明各个字段的含义：</p>
+
+<pre><code class="language-DNS">  ; cs.vu.nl的授权数据
+  cs.vu.nl  86 400 IN SOA   star boss(9527, 7200, 7200, 241 920, 86 400)
+  cs.vu.nl. 86 400 IN MX    1 zephyr
+  cs.vu.nl. 86 400 IN MX    2 top
+  cs.vu.nl. 86 400 IN NS    star
+  
+  star      86 400 IN A     130.27.56.205
+  zephyr    86 400 IN A     130.37.20.10
+  top       86 400 IN A     130.37.20.11
+  www       86 400 IN CNAME star.cs.vu.nl
+  ftp       86 400 IN CNAME zephyr.cs.vu.nl
+  flits     86 400 IN A     130.37.16.112
+  flits     86 400 IN A     192.31.231.165
+  flits     86 400 IN MX    1 flits
+  flits     86 400 IN MX    2 zephyr
+  flits     86 400 IN MX    3 top
+  
+  rowboat          IN A     130.37.56.201
+                   IN MX    1 rowboat
+                   IN MX    2 zephyr
+  
+  little-sister    IN A     130.37.62.23
+  
+  laserjet         IN A     192.31.231.216                
+</code></pre>
+
+<p>第一个非注释行 <code class="language-plaintext highlighter-rouge">SOA</code> 给出了一些该域的基本信息。2~3 给出了的记录时 <code class="language-plaintext highlighter-rouge">MX</code> 类型，按照上文所述这应该是一个邮箱类型的记录，它指明 <code class="language-plaintext highlighter-rouge">personal@cs.vu.nl</code> 邮箱可以投递给指定机器 <code class="language-plaintext highlighter-rouge">zephyr</code> ，如果失败了则尝试投递给机器 <code class="language-plaintext highlighter-rouge">top</code>。第 4 行指明 <code class="language-plaintext highlighter-rouge">cs.vu.nl</code> 域下的名字服务器是主机 <code class="language-plaintext highlighter-rouge">start</code>。</p>
+
+<p>第 5~7 行都是 <code class="language-plaintext highlighter-rouge">A</code> 类地址，分别指明了 <code class="language-plaintext highlighter-rouge">start</code>、<code class="language-plaintext highlighter-rouge">zephyr</code>、<code class="language-plaintext highlighter-rouge">top</code> 主机 ipv4 地址。第 8~9 行是两个别名，<code class="language-plaintext highlighter-rouge">www.cs.vu.nl</code> 对应 <code class="language-plaintext highlighter-rouge">star.cs.vu.nl</code>，<code class="language-plaintext highlighter-rouge">ftp.cs.vu.nl</code> 对应 <code class="language-plaintext highlighter-rouge">zephyr.cs.vu.nl</code>。</p>
+
+<p>第 10~11 行指定了 <code class="language-plaintext highlighter-rouge">flits</code> 的 主机 ipv4 地址，可以看到该域名绑定了两个物理主机地址。第 12~14 行，指定了向该域发送邮件的投递顺序，首先是 <code class="language-plaintext highlighter-rouge">flits</code> 本身，如果失效则依次尝试 <code class="language-plaintext highlighter-rouge">zephyr</code> 和 <code class="language-plaintext highlighter-rouge">top</code>。</p>
+
+<p>第 15~17 行指定了 <code class="language-plaintext highlighter-rouge">rowboat</code> 的 主机 ipv4 地址，和该域邮件投递地址，与 <code class="language-plaintext highlighter-rouge">flits</code> 类似。第 18~19 行则是指定了两个 <code class="language-plaintext highlighter-rouge">A</code> 类记录。</p>
+
+<p>我们通过上述记录可以看到，一个域名可以有多种类型的多条记录，一个域名同类型的记录可以有多条，例如：多个 <code class="language-plaintext highlighter-rouge">A</code> 地址，表明该域名绑定了多个主机；多个 <code class="language-plaintext highlighter-rouge">MX</code> 地址，表明该域下有多个邮件投递的选项，可以按照指定的优先顺序进行投递。</p>
+
+<h2 id="域名服务">域名服务</h2>
+
+<p>我们现在使用 nslookup 命令模拟一下域名解析的过程，nslookup 命令有两种模式：交互模式(Interactive mode) 和 非交互模式(non-interactive.)。为了模拟整个解析流程，我们使用交互模式来查询 <code class="language-plaintext highlighter-rouge">www.baidu.com</code> 的 ip 地址：</p>
+
+<ol>
+  <li>
+    <p>默认 name server 切换为 root name server，查询 com 域名服务器：</p>
+
+    <div class="language-shell highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code> nslookup
+ <span class="o">&gt;</span> server a.root-servers.net
+ Default server: a.root-servers.net
+ Address: 198.41.0.4#53
+ <span class="o">&gt;</span> <span class="nb">set </span>all
+ Default server: a.root-servers.net
+ Address: 198.41.0.4#53
+
+ Set options:
+   novc			nodebug		nod2
+   search		recurse
+   <span class="nb">timeout</span> <span class="o">=</span> 0		retry <span class="o">=</span> 3	port <span class="o">=</span> 53	ndots <span class="o">=</span> 1
+   querytype <span class="o">=</span> A       	class <span class="o">=</span> IN
+   srchlist <span class="o">=</span> PZ-L8
+
+ <span class="o">&gt;</span> <span class="nb">set type</span><span class="o">=</span>ns
+
+ <span class="o">&gt;</span> com.
+ <span class="p">;;</span> Truncated, retrying <span class="k">in </span>TCP mode.
+ Server:		a.root-servers.net
+ Address:	198.41.0.4#53
+
+ Non-authoritative answer:
+ <span class="k">***</span> Can<span class="s1">'t find com.: No answer
+
+ Authoritative answers can be found from:
+ com	nameserver = e.gtld-servers.net.
+ com	nameserver = b.gtld-servers.net.
+ com	nameserver = j.gtld-servers.net.
+ com	nameserver = m.gtld-servers.net.
+ com	nameserver = i.gtld-servers.net.
+ com	nameserver = f.gtld-servers.net.
+ com	nameserver = a.gtld-servers.net.
+ com	nameserver = g.gtld-servers.net.
+ com	nameserver = h.gtld-servers.net.
+ com	nameserver = l.gtld-servers.net.
+ com	nameserver = k.gtld-servers.net.
+ com	nameserver = c.gtld-servers.net.
+ com	nameserver = d.gtld-servers.net.
+ e.gtld-servers.net	internet address = 192.12.94.30
+ e.gtld-servers.net	has AAAA address 2001\:502\:1ca1::30
+ b.gtld-servers.net	internet address = 192.33.14.30
+ b.gtld-servers.net	has AAAA address 2001\:503\:231d:\:2\:30
+ j.gtld-servers.net	internet address = 192.48.79.30
+ j.gtld-servers.net	has AAAA address 2001\:502\:7094::30
+ m.gtld-servers.net	internet address = 192.55.83.30
+ m.gtld-servers.net	has AAAA address 2001\:501\:b1f9::30
+ i.gtld-servers.net	internet address = 192.43.172.30
+ i.gtld-servers.net	has AAAA address 2001\:503\:39c1::30
+ f.gtld-servers.net	internet address = 192.35.51.30
+ f.gtld-servers.net	has AAAA address 2001\:503\:d414::30
+ a.gtld-servers.net	internet address = 192.5.6.30
+ a.gtld-servers.net	has AAAA address 2001\:503\:a83e:\:2\:30
+ g.gtld-servers.net	internet address = 192.42.93.30
+ g.gtld-servers.net	has AAAA address 2001\:503\:eea3::30
+ h.gtld-servers.net	internet address = 192.54.112.30
+ h.gtld-servers.net	has AAAA address 2001\:502\:8cc::30
+ l.gtld-servers.net	internet address = 192.41.162.30
+ l.gtld-servers.net	has AAAA address 2001\:500\:d937::30
+ k.gtld-servers.net	internet address = 192.52.178.30
+ k.gtld-servers.net	has AAAA address 2001\:503\:d2d::30
+ c.gtld-servers.net	internet address = 192.26.92.30
+ c.gtld-servers.net	has AAAA address 2001\:503\:83eb::30
+ d.gtld-servers.net	internet address = 192.31.80.30
+ d.gtld-servers.net	has AAAA address 2001\:500\:856e::30
+</span></code></pre></div>    </div>
+  </li>
+  <li>
+    <p>默认 name server 切换到 com 的 name server，查询 baidu.com 域名服务器:</p>
+
+    <div class="language-shell highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code> <span class="o">&gt;</span> server j.gtld-servers.net
+ Default server: j.gtld-servers.net
+ Address: 192.48.79.30#53
+ <span class="o">&gt;</span> <span class="nb">set </span>all
+ Default server: j.gtld-servers.net
+ Address: 192.48.79.30#53
+
+ Set options:
+   novc			nodebug		nod2
+   search		recurse
+   <span class="nb">timeout</span> <span class="o">=</span> 0		retry <span class="o">=</span> 3	port <span class="o">=</span> 53	ndots <span class="o">=</span> 1
+   querytype <span class="o">=</span> ns      	class <span class="o">=</span> IN
+   srchlist <span class="o">=</span> PZ-L8
+ <span class="o">&gt;</span> baidu.com.
+ Server:		j.gtld-servers.net
+ Address:	192.48.79.30#53
+
+ Non-authoritative answer:
+ <span class="k">***</span> Can<span class="s1">'t find baidu.com.: No answer
+
+ Authoritative answers can be found from:
+ baidu.com	nameserver = ns2.baidu.com.
+ baidu.com	nameserver = ns3.baidu.com.
+ baidu.com	nameserver = ns4.baidu.com.
+ baidu.com	nameserver = ns1.baidu.com.
+ baidu.com	nameserver = ns7.baidu.com.
+ ns2.baidu.com	internet address = 220.181.33.31
+ ns3.baidu.com	internet address = 112.80.248.64
+ ns3.baidu.com	internet address = 36.152.45.193
+ ns4.baidu.com	internet address = 111.45.3.226
+ ns4.baidu.com	internet address = 14.215.178.80
+ ns1.baidu.com	internet address = 110.242.68.134
+ ns7.baidu.com	internet address = 180.76.76.92
+ ns7.baidu.com	has AAAA address 240e\:940\:603\:4\:0\:ff\:b01b:589a
+ ns7.baidu.com	has AAAA address 240e\:bf\:b801\:1002\:0\:ff\:b024:26de
+</span></code></pre></div>    </div>
+  </li>
+  <li>
+    <p>默认 name server 切换到  baidu.com 的 name server，查询 <code class="language-plaintext highlighter-rouge">www.baidu.com</code> 的ip地址:</p>
+
+    <div class="language-shell highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code> <span class="o">&gt;</span> server ns3.baidu.com
+ Default server: ns3.baidu.com
+ Address: 36.152.45.193#53
+ Default server: ns3.baidu.com
+ Address: 112.80.248.64#53
+ <span class="o">&gt;</span> www.baidu.com
+ Server:		ns3.baidu.com
+ Address:	36.152.45.193#53
+
+ www.baidu.com	canonical name <span class="o">=</span> www.a.shifen.com.
+</code></pre></div>    </div>
+
+    <p>此处发现 <code class="language-plaintext highlighter-rouge">www.baidu.com</code> 的规范名称为 <code class="language-plaintext highlighter-rouge">www.a.shifen.com</code>，这才是我们真正要解析的域名。</p>
+  </li>
+  <li>
+    <p>解析 <code class="language-plaintext highlighter-rouge">www.a.shifen.com</code> 的 ip 地址:</p>
+
+    <div class="language-shell highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code> <span class="o">&gt;</span> www.a.shifen.com.
+ Server:		ns3.baidu.com
+ Address:	36.152.45.193#53
+
+ Non-authoritative answer:
+ <span class="k">***</span> Can<span class="s1">'t find www.a.shifen.com.: No answer
+
+ Authoritative answers can be found from:
+ a.shifen.com	nameserver = ns2.a.shifen.com.
+ a.shifen.com	nameserver = ns3.a.shifen.com.
+ a.shifen.com	nameserver = ns4.a.shifen.com.
+ a.shifen.com	nameserver = ns5.a.shifen.com.
+ a.shifen.com	nameserver = ns1.a.shifen.com.
+ ns5.a.shifen.com	internet address = 180.76.76.95
+ ns4.a.shifen.com	internet address = 14.215.177.229
+ ns4.a.shifen.com	internet address = 111.20.4.28
+ ns3.a.shifen.com	internet address = 36.152.45.198
+ ns3.a.shifen.com	internet address = 112.80.255.253
+ ns2.a.shifen.com	internet address = 220.181.33.32
+ ns1.a.shifen.com	internet address = 110.242.68.42
+ ns5.a.shifen.com	has AAAA address 240e\:bf\:b801\:1006\:0\:ff\:b04f:346b
+ ns5.a.shifen.com	has AAAA address 240e\:940\:603\:a\:0\:ff\:b08d:239d
+ &gt; server ns5.a.shifen.com
+ Default server: ns5.a.shifen.com
+ Address: 180.76.76.95#53
+ &gt; set type=a
+ &gt; www.a.shifen.com
+ Server:		ns5.a.shifen.com
+ Address:	180.76.76.95#53
+
+ Name:	www.a.shifen.com
+ Address: 120.232.145.144
+ Name:	www.a.shifen.com
+ Address: 120.232.145.185
+</span></code></pre></div>    </div>
+
+    <p>最后得出的 ipv4 地址结果是：<code class="language-plaintext highlighter-rouge">120.232.145.144</code> 和 <code class="language-plaintext highlighter-rouge">120.232.145.185</code>，我们使用非交互式的查询方式验证一下：</p>
+
+    <div class="language-shell highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code> nslookup www.baidu.com
+ Server:		10.10.0.1
+ Address:	10.10.0.1#53
+
+ Non-authoritative answer:
+ www.baidu.com	canonical name <span class="o">=</span> www.a.shifen.com.
+ Name:	www.a.shifen.com
+ Address: 120.232.145.185
+ Name:	www.a.shifen.com
+ Address: 120.232.145.144
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<p>细心的人会发现，每一次查询 主机地址 或者 域名服务器，总会有两种类型的返回值：</p>
+
+<ul>
+  <li>Non-authoritative answer: 非权威性结果，它是 DNS 服务器中的缓存，为了加速查询；</li>
+  <li>Authoritative answer: 权威结果，这是由管理该服务器的权威部门提供的；</li>
+</ul>
+
+<p>我们最后验证答案的时候就是命中的本地域名服务器的 DNS 缓存。</p>
+
+<p>同时我们可以发现每个域下会有很多个 name server 记录，这是为了 dns 冗余设计的，允许每个域关联多个域名服务器，通常是设置一个主域名服务器和多个辅助域名服务器作为冗余备份。</p>
+
+<p>上述的例子有一点点特殊，它最后在 <code class="language-plaintext highlighter-rouge">ns3.baidu.com</code> 中发现其实 <code class="language-plaintext highlighter-rouge">www.baidu.com</code> 是 <code class="language-plaintext highlighter-rouge">www.a.shifen.com</code> 的别名。正常的如果记录是 A 类型则可以直接返回 主机地址了。</p>
+
+<p>准确的讲，我们整个流程不是模仿客户端解析域名的过程，而是<strong>模仿本地域名服务器的解析域名过程</strong>，完整的域名解析工作流程如下：</p>
+
+<p><img src="/assets/images/dns/nslookup_dns_flow.svg" alt="nslookup DNS flow"></p>
+
+<ul>
+  <li>a.root-servers.com: 根域名服务器，全球总共有 13 个根域名服务器（每个服务器对应多个计算机），命名从 a.root-server.com-m.root-server.com；</li>
+  <li>a.edu-server.net: TOP-Level 域名服务器，顶级域名的域名服务器；</li>
+  <li>marge.cac.washington.edu: 权威域名服务器；</li>
+</ul>
+
+<p>如上图所示，描述了解析 <code class="language-plaintext highlighter-rouge">cs.washington.edu</code> 的 ip 地址的整个流程，这里涉及如下几个概念：</p>
+
+<ul>
+  <li>
+    <p>递归查询：当主机将 <code class="language-plaintext highlighter-rouge">cs.washington.edu</code> 发送给本地域名服务器后，本地域名服务器就代替该主机处理域名解析工作，直到返回它所需的答案。这个答案必须是完整的，不能返回部分答案；</p>
+  </li>
+  <li>
+    <p>迭代查询：根域名服务器（以及接下来的每一个域名服务器）并不是递归查询，而是只返回一个部分答案给本地域名服务器，本地域名移动到下一个 name server 继续剩余的查询；</p>
+  </li>
+  <li>
+    <p>缓存技术：所有的查询答案，包括部分答案都会被本地DNS缓存，这样下一个主机再查询 <code class="language-plaintext highlighter-rouge">cs.washington.edu</code> 时可以直接返回 ip 地址；同时，当主机后续查询 <code class="language-plaintext highlighter-rouge">phys.washington.edu</code> 也可以直接发送给权威的域名服务器（washington.edu 域名服务器），直接从第 6 步开始执行；</p>
+  </li>
+</ul>
+
+<p>还记得我们上文提到的每一个 dns 记录都有一个 ttl 字段，对于那些不常变动的常用记录可以设置 ttl 为一天，对于那些高频变动的设置为几秒或者一分钟即可。在实际生产中，有很多企业的同城容灾系统，就是通过修改域名绑定的 ip 地址实现流量切换，但是由于缓存更新需要一定的时间（ttl过后才会失效），所以切换的速度通常在分钟级别。</p>
+
+<p>DNS 中常用 UDP 协议进行通信，报文格式简单，只有查询和响应，没有握手流程。如果很短时间内没有响应，DNS 客户端必须重复查询，在重试指定次数无效后，则去尝试域内的其他域名服务器，以此来保证高可用。每个查询携带 16 位的标识符，这些标识符会被添加到应道报文中，以此来匹配查询，避免查询结果混乱。</p>
+
+<h2 id="gethostbyname">gethostbyname</h2>
+
+<p>在实际工程中会调用系统或库提供的函数进行域名解析，以 C 语言为例：</p>
+
+<pre><code class="language-C">#include &lt;stdio.h&gt;
+#include &lt;netdb.h&gt;
+#include &lt;arpa/inet.h&gt;
+
+int main() {
+    struct hostent *he;
+    char *hostname = "www.baidu.com";
+    he = gethostbyname(hostname);
+    if (he == NULL) {
+        printf("Couldn't resolve hostname\n");
+        return 1;
+    }
+    printf("Hostname: %s\n", hostname);
+    printf("IP address: %s\n", inet_ntoa(*((struct in_addr*)he-&gt;h_addr)));
+    return 0;
+}
+</code></pre>
+
+<p>编译执行的结果如下：</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>gcc gethost.c <span class="nt">-o</span> gethost <span class="o">&amp;&amp;</span> ./gethost
+Hostname: www.baidu.com
+IP address: 120.232.145.144
+</code></pre></div></div>
+
+<p>它整个工作流程如下：</p>
+
+<ol>
+  <li>应用程序发起 DNS 查询请求；</li>
+  <li>操作系统内核首先检查本地缓存是否有该域名的 IP 地址信息；</li>
+  <li>如果本地缓存中不存在相应记录，则按照 <code class="language-plaintext highlighter-rouge">/etc/hosts</code> 中指定的顺序逐行读取其中的内容；</li>
+  <li>对于 <code class="language-plaintext highlighter-rouge">/etc/hosts</code> 中的每一行，如果包含了要查询的域名，则取出对应的 IP 地址并返回给应用程序；</li>
+  <li>如果 <code class="language-plaintext highlighter-rouge">/etc/hosts</code> 中没有匹配到相应的域名，则按照 <code class="language-plaintext highlighter-rouge">/etc/resolv.conf</code> 中指定的顺序依次向其中的 DNS 服务器发送查询请求；</li>
+  <li>如果某个 DNS 服务器返回了相应的解析结果，则操作系统内核将该结果保存在本地缓存中，并返回给应用程序；</li>
+  <li>如果所有 DNS 服务器都无法响应，则返回一个错误码给应用程序。</li>
+</ol>
+
+<p>因此，当使用 <code class="language-plaintext highlighter-rouge">gethostbyname()</code> 函数进行 DNS 解析时，除了使用 <code class="language-plaintext highlighter-rouge">/etc/resolv.conf</code> 文件中配置的 DNS 服务器地址来解析域名，也会自动利用 <code class="language-plaintext highlighter-rouge">/etc/hosts</code> 文件中的配置来解析域名。</p>
+
+<h2 id="参考链接">参考链接</h2>
+
+<ul>
+  <li><a href="https://www.rfc-editor.org/rfc/rfc1035">DOMAIN NAMES - IMPLEMENTATION AND SPECIFICATION</a></li>
+  <li>《计算机网络（第五版）》. 7.1 节. DNS–域名系统</li>
+</ul>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2023-11-14T00:00:00+08:00">November 14, 2023</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+
+  <a href="https://twitter.com/intent/tweet?text=Dns%20http%3A%2F%2Flocalhost%3A4000%2Fdns%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flocalhost%3A4000%2Fdns%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flocalhost%3A4000%2Fdns%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/set_benchmark_analyse/" class="pagination--pager" title="Set_benchmark_analyse
+">Previous</a>
+    
+    
+      <a href="#" class="pagination--pager disabled">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/set_benchmark_analyse/" rel="permalink">Set_benchmark_analyse
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          12 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">
+
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/redis_psync_protocol(1)/" rel="permalink">Redis_psync_protocol(1)
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          45 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">
+
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/redis_psync_protocol/" rel="permalink">Redis_psync_protocol
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          14 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">
+
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/design_pattern/" rel="permalink">Design_pattern
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          26 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">
+
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">© 2023 ZhipengWang. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+  </body>
+</html>
